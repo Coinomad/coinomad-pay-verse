@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Logo from './Logo';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
@@ -7,6 +8,7 @@ import { Menu, X } from 'lucide-react';
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Handle scroll event
   useEffect(() => {
@@ -58,15 +60,10 @@ const Navbar = () => {
             </ul>
             
             <Button 
-              onClick={() => {
-                const element = document.getElementById('waitlist');
-                if (element) {
-                  element.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
+              onClick={() => navigate('/signup')}
               className="bg-coinomad-primary hover:bg-coinomad-primary text-black font-medium neon-glow-primary hover:scale-105 transition-transform duration-200"
             >
-              Waitlist
+              Sign Up
             </Button>
           </div>
           
