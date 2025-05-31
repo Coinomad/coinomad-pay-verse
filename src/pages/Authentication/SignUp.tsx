@@ -10,15 +10,49 @@ export function SignupPage() {
     email: '',
     password: '',
     confirmPassword: '',
+    organizationName: '' // Add this field
   })
   const handleGoogleSignup = () => {
     // Google signup implementation would go here
     console.log('Google signup clicked')
   }
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Signup implementation would go here
-    console.log('Signup submitted', formData)
+    
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match')
+      return
+    }
+
+    try {
+      const response = await fetch('http://localhost:3000/v1/api/employerauth/signup/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          organizationName: formData.organizationName
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        localStorage.setItem('userId', data.userId)
+        localStorage.setItem('userEmail', formData.email) // Add this line
+        window.location.href = '/verify-email'
+      } else {
+        alert(data.message || 'Signup failed')
+      }
+    } catch (error) {
+      console.error('Signup error:', error)
+      alert('Failed to create account. Please try again.')
+    }
   }
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({
@@ -109,6 +143,29 @@ export function SignupPage() {
                     required
                   />
                 </div>
+              </div>
+            </div>
+            {/* Organization Name Field */}
+            <div>
+              <label
+                htmlFor="organizationName"
+                className="block text-sm font-medium text-gray-300 mb-2"
+              >
+                Organization Name *
+              </label>
+              <div className="relative">
+                <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  id="organizationName"
+                  type="text"
+                  value={formData.organizationName}
+                  onChange={(e) =>
+                    handleInputChange('organizationName', e.target.value)
+                  }
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg py-3 pl-10 pr-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                  placeholder="Enter your organization name"
+                  required
+                />
               </div>
             </div>
             {/* Email Field */}
