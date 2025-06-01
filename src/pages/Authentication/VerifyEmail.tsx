@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { MailIcon, LoaderIcon } from 'lucide-react'
+
 export function VerifyOTPPage() {
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [isVerifying, setIsVerifying] = useState(false)
@@ -21,6 +22,7 @@ export function VerifyOTPPage() {
       return () => clearTimeout(timer)
     }
   }, [resendTimer])
+
   const handleChange = (index: number, value: string) => {
     if (value.length > 1) return // Prevent multi-character input
     const newOtp = [...otp]
@@ -31,6 +33,7 @@ export function VerifyOTPPage() {
       inputRefs.current[index + 1]?.focus()
     }
   }
+
   const handleKeyDown = (
     index: number,
     e: React.KeyboardEvent<HTMLInputElement>,
@@ -40,15 +43,38 @@ export function VerifyOTPPage() {
       inputRefs.current[index - 1]?.focus()
     }
   }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsVerifying(true)
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await fetch('http://localhost:3000/v1/api/employerauth/signup/verify-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: userEmail,
+          verificationCode: otp.join(''),
+        }),
+      })
+
+      const data = await response.json()
       setIsVerifying(false)
-      console.log('Verifying OTP:', otp.join(''))
-    }, 1500)
+
+      if (data.success) {
+        console.log('Email verified successfully')
+        // Redirect or show success message
+      } else {
+        console.error(data.message)
+        // Show error message
+      }
+    } catch (error) {
+      console.error('Verification failed', error)
+      setIsVerifying(false)
+    }
   }
+
   const handleResendCode = () => {
     if (resendTimer === 0) {
       // Simulate sending new code
@@ -56,6 +82,7 @@ export function VerifyOTPPage() {
       setResendTimer(30)
     }
   }
+
   return (
     <div className="w-full min-h-screen bg-gray-900 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
