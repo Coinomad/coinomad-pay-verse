@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { MailIcon, LoaderIcon } from 'lucide-react'
 
 export function VerifyOTPPage() {
@@ -8,6 +8,7 @@ export function VerifyOTPPage() {
   const [resendTimer, setResendTimer] = useState(30)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
   const [userEmail, setUserEmail] = useState('')
+  const navigate = useNavigate()
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
@@ -62,16 +63,19 @@ export function VerifyOTPPage() {
       const data = await response.json()
       setIsVerifying(false)
 
-      if (data.success) {
-        console.log('Email verified successfully')
-        // Redirect or show success message
+      if (response.ok && data.success) {
+        // Clear the stored email from localStorage since we don't need it anymore
+        localStorage.removeItem('userEmail')
+        // Navigate to login page
+        navigate('/login')
       } else {
-        console.error(data.message)
-        // Show error message
+        console.error('Verification failed:', data.message)
+        // You might want to show an error message to the user here
       }
     } catch (error) {
-      console.error('Verification failed', error)
+      console.error('Verification failed:', error)
       setIsVerifying(false)
+      // You might want to show an error message to the user here
     }
   }
 
