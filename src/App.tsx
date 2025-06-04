@@ -7,6 +7,11 @@ import Index from "./pages/Index";
 import { VerifyOTPPage } from "./pages/Authentication/VerifyEmail";
 import { SignupPage } from "./pages/Authentication/SignUp";
 import { LoginPage } from "./pages/Authentication/Login";
+import Dashboard from "./pages/Dashboard/Dashboard"
+import Employees from "./pages/Dashboard/Employees"
+import Reports from "./pages/Dashboard/Reports"
+import Settings from "./pages/Dashboard/Settings"
+import Payroll from "./pages/Dashboard/Payroll"
 
 import NotFound from "./pages/NotFound";
 
@@ -23,6 +28,11 @@ const App = () => (
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/verify-email" element={<VerifyOTPPage />} />
           <Route path="/login" element={<LoginPage />} /> 
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/payroll" element={<Payroll />} />
+          <Route path="/employees" element={<Employees />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
