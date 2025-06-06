@@ -49,7 +49,7 @@ export function VerifyOTPPage() {
     e.preventDefault()
     setIsVerifying(true)
     try {
-      const response = await fetch('http://localhost:3000/v1/api/employerauth/signup/verify-email', {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}v1/api/employerauth/signup/verify-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
