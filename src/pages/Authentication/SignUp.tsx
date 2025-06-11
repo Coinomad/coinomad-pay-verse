@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { EyeIcon, EyeOffIcon, MailIcon, LockIcon, UserIcon } from 'lucide-react'
+
 export function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -26,7 +27,7 @@ export function SignupPage() {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/v1/api/employerauth/signup/email`, {
+      const response = await fetch(`http://localhost:3000/v1/api/employerauth/signup/email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -21,7 +21,8 @@ export function LoginPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}v1/api/employerauth/login`, {
+      const response = await fetch(`http://localhost:3000/v1/api/employerauth/login`, {
+        //${import.meta.env.VITE_SERVER_URL}
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
