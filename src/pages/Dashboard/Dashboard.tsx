@@ -6,25 +6,42 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { authAPI } from '@/Data/authAPI';
-import { axiosInstance } from '@/Data/axiosInstance';
+import axiosInstance from '../../Data/axiosInstance';
 import { Copy, QrCode, TrendingUp, TrendingDown, Wallet, RefreshCw } from 'lucide-react';
 import { QRCodeDialog } from '@/components/QRCodeDialog';
 import { toast } from '@/hooks/use-toast';
 
+interface Transaction {
+  transactionId: string;
+  type: 'incoming' | 'withdrawal';
+  asset: 'USDC' | 'USDT' | 'CUSD';
+  network: string;
+  amount: number;
+  timestamp: string;
+  status: 'PENDING' | 'CONFIRMED';
+  txHash: string;
+}
+
 const Dashboard = () => {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedWallet, setSelectedWallet] = useState('base');
-  const [transactions, setTransactions] = useState([]);
   const [showQRCode, setShowQRCode] = useState(false);
   const [qrAddress, setQrAddress] = useState('');
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await axiosInstance.get('/employers/transactions');
-        setTransactions(response.data.slice(0, 3));
+        const { data } = await axiosInstance.get('/wallet/transactions');
+        const transactionsArray = data.transactions || [];
+        if (Array.isArray(transactionsArray)) {
+          setTransactions(transactionsArray.slice(-3));
+        }
       } catch (error) {
         console.error('Error fetching transactions:', error);
-        toast({ title: "Error", description: "Failed to load transactions" });
+        toast({ 
+          title: "Error", 
+          description: error instanceof Error ? error.message : 'Failed to load transactions'
+        });
       }
     };
     
@@ -196,8 +213,15 @@ const Dashboard = () => {
                           <div key={asset} className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-[#ECE147]/10 rounded-full flex items-center justify-center">
-                                <span className="text-[#ECE147] font-bold text-sm">{asset}</span>
-                              </div>
+                                  <span className="flex items-center gap-1">
+                                    {asset === 'USDC' && (
+                                      <img src="/src/assets/usdc.png" alt="USDC" className="w-10 inline-block" />
+                                    )}
+                                    {asset === 'USDT' && (
+                                      <img src="/src/assets/usdt.png" alt="USDT" className="w-10 inline-block" />
+                                    )}
+                                  </span>
+                                </div>
                               <div>
                                 <div className="text-white font-semibold">{asset}</div>
                                 <div className="text-[#B3B3B3] text-sm">{wallet.name}</div>
@@ -239,12 +263,12 @@ const Dashboard = () => {
             <CardContent>
               <div className="space-y-4">
                 {transactions.map((tx) => (
-                  <div key={tx.id} className="flex items-center justify-between p-3 bg-[#2C2C2C] rounded-lg">
+                  <div key={tx.transactionId} className="flex items-center justify-between p-3 bg-[#2C2C2C] rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        tx.type === 'deposit' ? 'bg-[#9AE66E]/10' : 'bg-red-400/10'
+                        tx.type === 'incoming' ? 'bg-[#9AE66E]/10' : 'bg-red-400/10'
                       }`}>
-                        {tx.type === 'deposit' ? (
+                        {tx.type === 'incoming' ? (
                           <TrendingUp className="w-4 h-4 text-[#9AE66E]" />
                         ) : (
                           <TrendingDown className="w-4 h-4 text-red-400" />
@@ -259,9 +283,9 @@ const Dashboard = () => {
                     </div>
                     <div className="text-right">
                       <div className={`font-semibold ${
-                        tx.type === 'deposit' ? 'text-[#9AE66E]' : 'text-red-400'
+                        tx.type === 'incoming' ? 'text-[#9AE66E]' : 'text-red-400'
                       }`}>
-                        {tx.type === 'deposit' ? '+' : '-'}${tx.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        {tx.type === 'incoming' ? '+' : '-'}${tx.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant={tx.status === 'CONFIRMED' ? 'default' : 'secondary'}
