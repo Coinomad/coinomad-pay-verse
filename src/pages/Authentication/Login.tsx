@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { EyeIcon, EyeOffIcon, MailIcon, LockIcon } from 'lucide-react'
+import { authAPI } from '@/Data/authAPI';
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -21,31 +22,17 @@ export function LoginPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`http://localhost:3000/v1/api/employerauth/login`, {
-        //${import.meta.env.VITE_SERVER_URL}
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      })
-
-      const data = await response.json()
+      // Replace fetch call with:
+      const response = await authAPI.login({ email, password });
+      const data = response.data;
 
       if (data.success) {
+        const { accessToken, firstName, expiresIn } = response.data.data || {};
         // Store the access token
-        localStorage.setItem('accessToken', data.data.accessToken)
+        localStorage.setItem('accessToken', accessToken)
         // Store user info if needed
-        localStorage.setItem('userInfo', JSON.stringify({
-          email: data.data.email,
-          firstName: data.data.firstName,
-          lastName: data.data.lastName,
-          organizationName: data.data.organizationName,
-        }))
-        
+        localStorage.setItem('firstName', firstName)
+        localStorage.setItem("user", data.data);
         // Redirect to dashboard or home page
         navigate('/dashboard')
       } else {

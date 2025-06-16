@@ -1,18 +1,35 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { authAPI } from '@/Data/authAPI';
+import { axiosInstance } from '@/Data/axiosInstance';
 import { Copy, QrCode, TrendingUp, TrendingDown, Wallet, RefreshCw } from 'lucide-react';
 import { QRCodeDialog } from '@/components/QRCodeDialog';
 import { toast } from '@/hooks/use-toast';
 
 const Dashboard = () => {
   const [selectedWallet, setSelectedWallet] = useState('base');
+  const [transactions, setTransactions] = useState([]);
   const [showQRCode, setShowQRCode] = useState(false);
   const [qrAddress, setQrAddress] = useState('');
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await axiosInstance.get('/employers/transactions');
+        setTransactions(response.data.slice(0, 3));
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+        toast({ title: "Error", description: "Failed to load transactions" });
+      }
+    };
+    
+    fetchTransactions();
+  }, []);
 
   const wallets = {
     base: {
@@ -221,21 +238,23 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentTransactions.map((tx) => (
+                {transactions.map((tx) => (
                   <div key={tx.id} className="flex items-center justify-between p-3 bg-[#2C2C2C] rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                         tx.type === 'deposit' ? 'bg-[#9AE66E]/10' : 'bg-red-400/10'
                       }`}>
                         {tx.type === 'deposit' ? (
-                          <TrendingUp className={`w-4 h-4 ${tx.type === 'deposit' ? 'text-[#9AE66E]' : 'text-red-400'}`} />
+                          <TrendingUp className="w-4 h-4 text-[#9AE66E]" />
                         ) : (
                           <TrendingDown className="w-4 h-4 text-red-400" />
                         )}
                       </div>
                       <div>
                         <div className="text-white font-semibold capitalize">{tx.type}</div>
-                        <div className="text-[#B3B3B3] text-sm">{tx.asset} • {tx.network}</div>
+                        <div className="text-[#B3B3B3] text-sm">
+                          {tx.asset} • {tx.network}
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">
@@ -245,11 +264,13 @@ const Dashboard = () => {
                         {tx.type === 'deposit' ? '+' : '-'}${tx.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant={tx.status === 'completed' ? 'default' : 'secondary'} 
-                               className={tx.status === 'completed' ? 'bg-[#9AE66E]/10 text-[#9AE66E]' : 'bg-yellow-400/10 text-yellow-400'}>
-                          {tx.status}
+                        <Badge variant={tx.status === 'CONFIRMED' ? 'default' : 'secondary'}
+                               className={tx.status === 'CONFIRMED' ? 'bg-[#9AE66E]/10 text-[#9AE66E]' : 'bg-yellow-400/10 text-yellow-400'}>
+                          {tx.status.toLowerCase()}
                         </Badge>
-                        <span className="text-[#B3B3B3] text-xs">{tx.time}</span>
+                        <span className="text-[#B3B3B3] text-xs">
+                          {new Date(tx.timestamp).toLocaleTimeString()}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -270,3 +291,12 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+
+
+
+
+
+
+
+

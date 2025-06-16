@@ -14,6 +14,7 @@ import Settings from "./pages/Dashboard/Settings"
 import Payroll from "./pages/Dashboard/Payroll"
 
 import NotFound from "./pages/NotFound";
+import { ProtectedRoute } from "./pages/Dashboard/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -28,11 +29,46 @@ const App = () => (
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/verify-email" element={<VerifyOTPPage />} />
           <Route path="/login" element={<LoginPage />} /> 
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/payroll" element={<Payroll />} />
-          <Route path="/employees" element={<Employees />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/settings" element={<Settings />} />
+          <Route 
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="/payroll" 
+            element={
+              <ProtectedRoute>
+                <Payroll />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/employees" 
+            element={
+              <ProtectedRoute>
+                <Employees />
+              </ProtectedRoute>
+              } 
+          />
+          <Route 
+            path="/reports" 
+            element={
+              <ProtectedRoute>
+                <Reports />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/settings" 
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            } 
+          />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
