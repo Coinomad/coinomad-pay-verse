@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [selectedWallet, setSelectedWallet] = useState('base');
   const [showQRCode, setShowQRCode] = useState(false);
   const [qrAddress, setQrAddress] = useState('');
+  const [wallets, setWallets] = useState<Record<string, any>>({});
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -48,78 +49,29 @@ const Dashboard = () => {
     fetchTransactions();
   }, []);
 
-  const wallets = {
-    base: {
-      name: 'Base',
-      address: '0x742d35cc6bf4532c0932b35a35b35c56d3f5f1d7',
-      assets: {
-        USDT: { balance: 15420.50, change: '+2.3%', isPositive: true },
-        USDC: { balance: 8750.25, change: '-0.8%', isPositive: false }
+  useEffect(() => {
+    const fetchWalletBalances = async () => {
+      try {
+        const { data } = await axiosInstance.get('/wallet/balance');
+        setWallets(data);
+      } catch (error) {
+        console.error('Error fetching wallet balances:', error);
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : 'Failed to load wallet balances'
+        });
       }
-    },
-    ethereum: {
-      name: 'Ethereum',
-      address: '0x892d35cc6bf4532c0932b35a35b35c56d3f5f1d8',
-      assets: {
-        USDT: { balance: 25680.75, change: '+5.2%', isPositive: true },
-        USDC: { balance: 12340.00, change: '+1.2%', isPositive: true }
-      }
-    },
-    polygon: {
-      name: 'Polygon',
-      address: '0x123d35cc6bf4532c0932b35a35b35c56d3f5f1d9',
-      assets: {
-        USDT: { balance: 8920.30, change: '+0.5%', isPositive: true },
-        USDC: { balance: 5670.80, change: '-1.1%', isPositive: false }
-      }
-    },
-    celo: {
-      name: 'Celo',
-      address: '0x456d35cc6bf4532c0932b35a35b35c56d3f5f1e0',
-      assets: {
-        CUSD: { balance: 4560.90, change: '+3.7%', isPositive: true }
-      }
-    }
-  };
+    };
 
-  const recentTransactions = [
-    {
-      id: 1,
-      type: 'deposit',
-      asset: 'USDT',
-      network: 'Base',
-      amount: 1250.00,
-      date: '2024-06-03',
-      time: '14:30',
-      status: 'completed',
-      txHash: '0xabc123...'
-    },
-    {
-      id: 2,
-      type: 'withdrawal',
-      asset: 'USDC',
-      network: 'Ethereum',
-      amount: 850.50,
-      date: '2024-06-02',
-      time: '09:15',
-      status: 'completed',
-      txHash: '0xdef456...'
-    },
-    {
-      id: 3,
-      type: 'deposit',
-      asset: 'CUSD',
-      network: 'Celo',
-      amount: 500.00,
-      date: '2024-06-01',
-      time: '16:45',
-      status: 'pending',
-      txHash: '0xghi789...'
-    }
-  ];
+    fetchWalletBalances();
+    const interval = setInterval(fetchWalletBalances, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const totalBalance = Object.values(wallets).reduce((total, wallet) => {
-    return total + Object.values(wallet.assets).reduce((sum, asset) => sum + asset.balance, 0);
+  // Remove hardcoded wallets object
+
+  const totalBalance = Object.values(wallets).reduce((total: number, wallet: any) => {
+    return total + (wallet.assets?.USDT?.balance || 0) + (wallet.assets?.USDC?.balance || 0);
   }, 0);
 
   const copyAddress = (address: string) => {
@@ -157,10 +109,10 @@ const Dashboard = () => {
             <div className="text-3xl font-bold text-white mb-2">
               ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
             </div>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-[#9AE66E]" />
               <span className="text-[#9AE66E] text-sm">+4.2% this month</span>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
 
@@ -229,9 +181,9 @@ const Dashboard = () => {
                             </div>
                             <div className="text-right">
                               <div className="text-white font-semibold">
-                                ${data.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                ${(data as { balance: number }).balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                               </div>
-                              <div className={`text-sm flex items-center gap-1 ${
+                              {/* <div className={`text-sm flex items-center gap-1 ${
                                 data.isPositive ? 'text-[#9AE66E]' : 'text-red-400'
                               }`}>
                                 {data.isPositive ? (
@@ -240,7 +192,7 @@ const Dashboard = () => {
                                   <TrendingDown className="w-3 h-3" />
                                 )}
                                 {data.change}
-                              </div>
+                              </div> */}
                             </div>
                           </div>
                         ))}
