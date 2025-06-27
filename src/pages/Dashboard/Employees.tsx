@@ -1,8 +1,9 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import axiosInstance from '../../Data/axiosInstance';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Search, Edit, Calendar, Trash2 } from 'lucide-react';
@@ -11,13 +12,17 @@ import { ScheduleDialog } from '@/components/ScheduleDialog';
 import { Input } from '@/components/ui/input';
 
 interface Employee {
-  id: number;
+  _id: string;
   name: string;
   email: string;
+  network: 'BASE' | 'POLYGON' | 'ETHEREUM' | 'CELO';
   position: string;
   walletAddress: string;
-  asset: string;
-  network: string;
+  asset: 'USDT' | 'USDC';
+  paymentTotal: Record<string, {
+    usdt: string;
+    usdc: string;
+  }>;
   schedules: Schedule[];
 }
 
@@ -31,51 +36,45 @@ interface Schedule {
 }
 
 const Employees = () => {
-  const [employees, setEmployees] = useState<Employee[]>([
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john@company.com',
-      position: 'Software Engineer',
-      walletAddress: '0x742d35cc6bf4532c0932b35a35b35c56d3f5f1d7',
-      asset: 'USDT',
-      network: 'Base',
-      schedules: [
-        {
-          id: 1,
-          type: 'monthly',
-          amount: 5000,
-          asset: 'USDT',
-          status: 'active',
-          nextPayment: '2024-07-01'
-        }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      email: 'jane@company.com',
-      position: 'Product Manager',
-      walletAddress: '0x892d35cc6bf4532c0932b35a35b35c56d3f5f1d8',
-      asset: 'USDC',
-      network: 'Ethereum',
-      schedules: [
-        {
-          id: 2,
-          type: 'weekly',
-          amount: 1500,
-          asset: 'USDC',
-          status: 'active',
-          nextPayment: '2024-06-10'
-        }
-      ]
-    }
-  ]);
-
   const [showAddEmployee, setShowAddEmployee] = useState(false);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  
+  useEffect(() => {
+  const fetchEmployees = async () => {
+    try {
+      setLoading(true);
+      const { data } = await axiosInstance.get('/employee/getemployees');
+      setEmployees(data.data);
+    } catch (error) {
+      setError('Failed to refresh employee list');
+      console.error('Fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!showAddEmployee) { // Only refresh when modal closes
+    fetchEmployees();
+  }
+});
+
+  
+  // Update the Employee interface to match API response:
+  interface Employee {
+    employeeId: string;
+    name: string;
+    email: string;
+    position: string;
+    walletAddress: string;
+    asset: string;
+    network: string;
+    scheduleTransaction?: any;
+  }
 
   const filteredEmployees = employees.filter(employee =>
     employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -83,13 +82,14 @@ const Employees = () => {
     employee.position.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const addEmployee = (employeeData: Omit<Employee, 'id' | 'schedules'>) => {
-    const newEmployee: Employee = {
-      ...employeeData,
-      id: employees.length + 1,
-      schedules: []
-    };
-    setEmployees([...employees, newEmployee]);
+  const addEmployee = async (employeeData: Omit<Employee, '_id' | 'schedules'>) => {
+    try {
+      const { data } = await axiosInstance.post('/employee/register', employeeData);
+      setEmployees(prev => [...prev, data.data]);
+    } catch (error) {
+      console.error('Registration failed:', error.response?.data?.message || error.message);
+      // Add error state handling here
+    }
   };
 
   const openScheduleDialog = (employee: Employee) => {
@@ -97,24 +97,24 @@ const Employees = () => {
     setShowScheduleDialog(true);
   };
 
-  const addSchedule = (schedule: Omit<Schedule, 'id'>) => {
-    if (!selectedEmployee) return;
+  // const addSchedule = (schedule: Omit<Schedule, 'id'>) => {
+  //   if (!selectedEmployee) return;
     
-    const newSchedule: Schedule = {
-      ...schedule,
-      id: Date.now()
-    };
+  //   const newSchedule: Schedule = {
+  //     ...schedule,
+  //     id: Date.now()
+  //   };
 
-    setEmployees(employees.map(emp => 
-      emp.id === selectedEmployee.id 
-        ? { ...emp, schedules: [...emp.schedules, newSchedule] }
-        : emp
-    ));
-  };
+  //   setEmployees(employees.map(emp => 
+  //     emp._id === selectedEmployee._id
+  //       ? { ...emp, schedules: [...emp.schedules, newSchedule] }
+  //       : emp
+  //   ));
+  // };
 
-  const removeEmployee = (employeeId: number) => {
-    setEmployees(employees.filter(emp => emp.id !== employeeId));
-  };
+  // const removeEmployee = (employeeId: number) => {
+  //   setEmployees(employees.filter(emp => emp.id !== employeeId));
+  // };
 
   return (
     <div className="min-h-screen bg-[#0D0D0D] text-white">
@@ -296,3 +296,11 @@ const Employees = () => {
 };
 
 export default Employees;
+
+
+
+
+
+
+// Update useEffect to refresh employee list after registration
+
