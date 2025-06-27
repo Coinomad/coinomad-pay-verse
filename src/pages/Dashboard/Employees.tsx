@@ -11,31 +11,31 @@ import { AddEmployeeDialog } from '@/components/AddEmployeeDialog';
 import { ScheduleDialog } from '@/components/ScheduleDialog';
 import { Input } from '@/components/ui/input';
 
-interface Employee {
-  _id: string;
-  name: string;
-  email: string;
-  network: 'BASE' | 'POLYGON' | 'ETHEREUM' | 'CELO';
-  position: string;
-  walletAddress: string;
-  asset: 'USDT' | 'USDC';
-  paymentTotal: Record<string, {
-    usdt: string;
-    usdc: string;
-  }>;
-  schedules: Schedule[];
-}
-
-interface Schedule {
-  id: number;
-  type: 'daily' | 'weekly' | 'monthly';
-  amount: number;
-  asset: string;
-  status: 'active' | 'paused';
-  nextPayment: string;
-}
-
 const Employees = () => {
+  interface Employee {
+    _id: string;
+    name: string;
+    email: string;
+    network: 'BASE' | 'POLYGON' | 'ETHEREUM' | 'CELO';
+    position: string;
+    walletAddress: string;
+    asset: 'USDT' | 'USDC';
+    paymentTotal: Record<string, {
+      usdt: string;
+      usdc: string;
+    }>;
+    schedules: Schedule[];
+  }
+
+  interface Schedule {
+    id: number;
+    type: 'daily' | 'weekly' | 'monthly';
+    amount: number;
+    asset: string;
+    status: 'active' | 'paused';
+    nextPayment: string;
+  }
+
   const [showAddEmployee, setShowAddEmployee] = useState(false);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -71,8 +71,8 @@ const Employees = () => {
     email: string;
     position: string;
     walletAddress: string;
-    asset: string;
-    network: string;
+    asset: 'USDT' | 'USDC';
+    network: 'BASE' | 'POLYGON' | 'ETHEREUM' | 'CELO';
     scheduleTransaction?: any;
   }
 
@@ -97,13 +97,13 @@ const Employees = () => {
     setShowScheduleDialog(true);
   };
 
-  // const addSchedule = (schedule: Omit<Schedule, 'id'>) => {
-  //   if (!selectedEmployee) return;
+  const addSchedule = (schedule: Omit<Schedule, 'id'>) => {
+    if (!selectedEmployee) return;
     
-  //   const newSchedule: Schedule = {
-  //     ...schedule,
-  //     id: Date.now()
-  //   };
+    const newSchedule: Schedule = {
+      ...schedule,
+      id: Date.now()
+    };
 
   //   setEmployees(employees.map(emp => 
   //     emp._id === selectedEmployee._id
@@ -146,7 +146,7 @@ const Employees = () => {
           <Card className="bg-[#1A1A1A] border-[#2C2C2C]">
             <CardContent className="p-6">
               <div className="text-2xl font-bold text-white">
-                {employees.reduce((total, emp) => total + emp.schedules.filter(s => s.status === 'active').length, 0)}
+                {employees.reduce((total, emp) => total + (emp.scheduleTransaction?.filter(s => s.status === 'active')?.length || 0), 0)}
               </div>
               <div className="text-[#B3B3B3] text-sm">Active Schedules</div>
             </CardContent>
@@ -155,7 +155,7 @@ const Employees = () => {
             <CardContent className="p-6">
               <div className="text-2xl font-bold text-white">
                 ${employees.reduce((total, emp) => 
-                  total + emp.schedules.reduce((sum, schedule) => sum + schedule.amount, 0), 0
+                  total + (emp.scheduleTransaction?.reduce((sum, schedule) => sum + Number(schedule.amount), 0) || 0), 0
                 ).toLocaleString()}
               </div>
               <div className="text-[#B3B3B3] text-sm">Total Monthly Payroll</div>
@@ -198,7 +198,7 @@ const Employees = () => {
               </TableHeader>
               <TableBody>
                 {filteredEmployees.map((employee) => (
-                  <TableRow key={employee.id} className="border-[#2C2C2C]">
+                  <TableRow key={employee._id} className="border-[#2C2C2C]">
                     <TableCell>
                       <div>
                         <div className="text-white font-medium">{employee.name}</div>
@@ -262,7 +262,7 @@ const Employees = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => removeEmployee(employee.id)}
+                          // onClick={() => removeEmployee(employee.id)}
                           className="text-red-400 hover:text-red-300"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -287,7 +287,7 @@ const Employees = () => {
         <ScheduleDialog 
           isOpen={showScheduleDialog} 
           onClose={() => setShowScheduleDialog(false)} 
-          employee={selectedEmployee}
+          employee={{...selectedEmployee, id: parseInt(selectedEmployee._id)}}
           onAddSchedule={addSchedule}
         />
       )}
@@ -297,10 +297,4 @@ const Employees = () => {
 
 export default Employees;
 
-
-
-
-
-
-// Update useEffect to refresh employee list after registration
 
