@@ -61,7 +61,7 @@ const Employees = () => {
   if (!showAddEmployee) { // Only refresh when modal closes
     fetchEmployees();
   }
-});
+  });
 
   
   // Update the Employee interface to match API response:
@@ -295,6 +295,7 @@ const Employees = () => {
   );
 };
 
+
+};
+
 export default Employees;
-
-
