@@ -105,9 +105,9 @@ export const ScheduleDialog = ({ isOpen, onClose, employee, onAddSchedule }: Sch
           {/* Existing Schedules */}
           <div>
             <h3 className="text-white font-medium mb-3">Current Schedules</h3>
-            {employee.schedules.length > 0 ? (
+            {(employee.schedules ?? []).length > 0 ? (
               <div className="space-y-2">
-                {employee.schedules.map((schedule) => (
+                {(employee.schedules ?? []).map((schedule) => (
                   <div key={schedule.id} className="flex items-center justify-between p-3 bg-[#2C2C2C] rounded-lg">
                     <div className="flex items-center gap-3">
                       <Badge 
