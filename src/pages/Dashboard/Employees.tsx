@@ -135,7 +135,11 @@ const Employees = () => {
               <Card className="bg-[#1A1A1A] border-[#2C2C2C]">
                 <CardContent className="p-6">
                   <div className="text-2xl font-bold text-white">
-                    {employees.reduce((total, emp) => total + (emp.scheduleTransaction?.filter(s => s.status === 'active')?.length || 0), 0)}
+                    {employees.reduce((total, emp) => {
+                      // Check if scheduleTransaction is an array
+                      const transactions = Array.isArray(emp.scheduleTransaction) ? emp.scheduleTransaction : [];
+                      return total + (transactions.filter(s => s.status === 'active')?.length || 0);
+                    }, 0)}
                   </div>
                   <div className="text-[#B3B3B3] text-sm">Active Schedules</div>
                 </CardContent>
@@ -143,9 +147,11 @@ const Employees = () => {
               <Card className="bg-[#1A1A1A] border-[#2C2C2C]">
                 <CardContent className="p-6">
                   <div className="text-2xl font-bold text-white">
-                    ${employees.reduce((total, emp) => 
-                      total + (emp.scheduleTransaction?.reduce((sum, schedule) => sum + Number(schedule.amount), 0) || 0), 0
-                    ).toLocaleString()}
+                    ${employees.reduce((total, emp) => {
+                      // Check if scheduleTransaction is an array
+                      const transactions = Array.isArray(emp.scheduleTransaction) ? emp.scheduleTransaction : [];
+                      return total + (transactions.reduce((sum, schedule) => sum + Number(schedule.amount || 0), 0) || 0);
+                    }, 0).toLocaleString()}
                   </div>
                   <div className="text-[#B3B3B3] text-sm">Total Monthly Payroll</div>
                 </CardContent>
