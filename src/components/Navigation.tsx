@@ -2,6 +2,7 @@
 import { Bell, ChevronDown, Search } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Link, useLocation } from 'react-router-dom';
+import Logo from './Logo';
 
 export const Navigation = () => {
   const location = useLocation();
@@ -21,10 +22,9 @@ export const Navigation = () => {
           {/* Left side - Logo and Menu */}
           <div className="flex items-center space-x-8">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-[#ECE147] rounded-lg flex items-center justify-center">
-                <span className="text-black font-bold text-sm">C</span>
-              </div>
-              <span className="text-xl font-bold text-white">Coinomad</span>
+               <div className="text-center ">
+                  <Logo />
+                </div>
             </Link>
             
             <div className="hidden md:flex items-center space-x-6">

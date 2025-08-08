@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/v1/api',
   timeout: 10000,
@@ -22,10 +21,18 @@ axiosInstance.interceptors.request.use(config => {
 axiosInstance.interceptors.response.use(
   response => response,
   error => {
-    if (error.response.status === 401) {
+    // Check if error.response exists before accessing its properties
+    if (error.response && error.response.status === 401) {
       localStorage.removeItem('accessToken');
       window.location.href = '/login';
     }
+    
+    // Handle network errors or other errors without response
+    if (!error.response) {
+      console.error('Network error or server unreachable:', error.message);
+      // You can add custom handling for network errors here
+    }
+    
     return Promise.reject(error);
   }
 );

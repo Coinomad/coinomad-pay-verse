@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Plus, Search, Edit, Calendar, Trash2 } from 'lucide-react';
 import { AddEmployeeDialog } from '@/components/AddEmployeeDialog';
-import { ScheduleDialog } from '@/components/ScheduleDialog';
+import { SchedulingModal } from '@/components/ScheduleDialog';
 import { Input } from '@/components/ui/input';
 
 interface Schedule {
@@ -84,11 +84,30 @@ const Employees = () => {
 
   const addSchedule = (schedule: Omit<Schedule, 'id'>) => {
     if (!selectedEmployee) return;
+    
     const newSchedule: Schedule = {
       ...schedule,
       id: Date.now()
     };
-    // Implement schedule addition logic here
+    
+    // Update the selected employee's schedules
+    const updatedEmployee = {
+      ...selectedEmployee,
+      schedules: [...(selectedEmployee.schedules || []), newSchedule]
+    };
+    
+    // Update the employees state
+    setEmployees(prev => 
+      prev.map(emp => 
+        emp._id === selectedEmployee._id ? updatedEmployee : emp
+      )
+    );
+    
+    // Update the selected employee state
+    setSelectedEmployee(updatedEmployee);
+    
+    // Optionally close the dialog or show success message
+    console.log('Schedule added successfully:', newSchedule);
   };
 
   // const removeEmployee = (employeeId: number) => {
@@ -139,7 +158,7 @@ const Employees = () => {
                       // Check if scheduleTransaction is an array
                       const transactions = Array.isArray(emp.scheduleTransaction) ? emp.scheduleTransaction : [];
                       return total + (transactions.filter(s => s.status === 'active')?.length || 0);
-                    }, 0)}
+                    }, 2)}
                   </div>
                   <div className="text-[#B3B3B3] text-sm">Active Schedules</div>
                 </CardContent>
@@ -150,7 +169,7 @@ const Employees = () => {
                     ${employees.reduce((total, emp) => {
                       // Check if scheduleTransaction is an array
                       const transactions = Array.isArray(emp.scheduleTransaction) ? emp.scheduleTransaction : [];
-                      return total + (transactions.reduce((sum, schedule) => sum + Number(schedule.amount || 0), 0) || 0);
+                      return total + (transactions.reduce((sum, schedule) => sum + Number(schedule.amount || 0), 0) || 500);
                     }, 0).toLocaleString()}
                   </div>
                   <div className="text-[#B3B3B3] text-sm">Total Monthly Payroll</div>
@@ -279,11 +298,11 @@ const Employees = () => {
         onAddEmployee={addEmployee}
       />
       {selectedEmployee && showScheduleDialog && (
-        <ScheduleDialog 
+        <SchedulingModal 
           isOpen={showScheduleDialog} 
           onClose={() => setShowScheduleDialog(false)} 
           employee={{...selectedEmployee, id: parseInt(selectedEmployee._id)}}
-          onAddSchedule={addSchedule}
+          //onAddSchedule={addSchedule}
         />
       )}
     </div>

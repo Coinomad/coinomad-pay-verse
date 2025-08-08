@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { EyeIcon, EyeOffIcon, MailIcon, LockIcon } from 'lucide-react'
 import { authAPI } from '@/Data/authAPI';
+import Logo from '../../components/Logo'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -20,43 +21,46 @@ export function LoginPage() {
     e.preventDefault()
     setError('')
     setIsLoading(true)
-
+  
     try {
-      // Replace fetch call with:
       const response = await authAPI.login({ email, password });
       const data = response.data;
-
+  
       if (data.success) {
         const { accessToken, firstName, expiresIn } = response.data.data || {};
-        // Store the access token
         localStorage.setItem('accessToken', accessToken)
-        // Store user info if needed
         localStorage.setItem('firstName', firstName)
         localStorage.setItem("user", data.data);
-        // Redirect to dashboard or home page
         navigate('/dashboard')
       } else {
         setError(data.message || 'Login failed. Please try again.')
       }
     } catch (error) {
-      setError('An error occurred. Please try again later.')
       console.error('Login error:', error)
+      
+      // Handle different types of errors
+      if (error.response) {
+        // Server responded with error status
+        const message = error.response.data?.message || 'Login failed. Please try again.'
+        setError(message)
+      } else if (error.request) {
+        // Network error - no response received
+        setError('Network error. Please check your connection and try again.')
+      } else {
+        // Other error
+        setError('An unexpected error occurred. Please try again.')
+      }
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="w-full min-h-screen bg-gray-900 flex items-center justify-center px-4">
+    <div className="w-full min-h-screen bg-black flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-              <span className="text-gray-900 font-bold text-lg">C</span>
-            </div>
-            <span className="text-white text-xl font-semibold">Coinomad</span>
-          </div>
+         <Logo />
         </div>
         {/* Login Form */}
         <div className="bg-gray-800 rounded-xl p-8 shadow-2xl">

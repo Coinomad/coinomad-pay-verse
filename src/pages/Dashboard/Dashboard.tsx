@@ -11,6 +11,7 @@ import { Copy, QrCode, TrendingUp, TrendingDown, Wallet, RefreshCw } from 'lucid
 import { QRCodeDialog } from '@/components/QRCodeDialog';
 import { toast } from '@/hooks/use-toast';
 
+
 interface Transaction {
   transactionId: string;
   type: 'incoming' | 'withdrawal';

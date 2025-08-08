@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import Logo from '../../components/Logo'
 import { EyeIcon, EyeOffIcon, MailIcon, LockIcon, UserIcon } from 'lucide-react'
 
 export function SignupPage() {
@@ -66,12 +67,7 @@ export function SignupPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-              <span className="text-gray-900 font-bold text-lg">C</span>
-            </div>
-            <span className="text-white text-xl font-semibold">Coinomad</span>
-          </div>
+         <Logo />
         </div>
         {/* Signup Form */}
         <div className="bg-gray-800 rounded-xl p-8 shadow-2xl">
