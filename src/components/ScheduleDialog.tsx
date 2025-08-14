@@ -18,26 +18,26 @@ export type Schedule = {
   day?: string
 }
 
-interface Employee {
-  _id: string
-  id: number
+export interface Employee {
+  employeeId: string
   name: string
   position: string
-  // Add other employee properties as needed
+  asset?: string
+  network?: string
 }
 
 interface SchedulingModalProps {
   isOpen: boolean
   onClose: () => void
   employee: Employee
-  //onAddSchedule: (schedule: Schedule) => void
+  onRefresh?: () => void // Add this prop
 }
 
 export const SchedulingModal: React.FC<SchedulingModalProps> = ({
   isOpen,
   onClose,
   employee,
-  //onAddSchedule,
+  onRefresh, // Add this
 }) => {
   const [paymentType, setPaymentType] = useState<PaymentType>('recurring')
   const [schedules, setSchedules] = useState<Schedule[]>([])
@@ -103,9 +103,9 @@ export const SchedulingModal: React.FC<SchedulingModalProps> = ({
             />
             <div className="mt-4">
               {paymentType === 'specific' ? (
-                <SpecificPaymentForm onAddSchedule={handleAddSchedule} />
+                <SpecificPaymentForm onAddSchedule={handleAddSchedule} employee={employee} />
               ) : (
-                <RecurringPaymentForm onAddSchedule={handleAddSchedule} />
+                <RecurringPaymentForm onAddSchedule={handleAddSchedule} employee={employee} />
               )}
             </div>
           </div>
@@ -115,7 +115,10 @@ export const SchedulingModal: React.FC<SchedulingModalProps> = ({
         <div className="p-6 border-t border-gray-700">
           <button
             className="w-full bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300 transition-colors"
-            onClick={onClose}
+            onClick={() => {
+              onRefresh?.() // Call refresh function if provided
+              onClose()
+            }}
           >
             Close
           </button>
