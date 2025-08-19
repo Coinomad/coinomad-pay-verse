@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,9 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { authAPI } from '@/Data/authAPI';
 import axiosInstance from '../../Data/axiosInstance';
-import { Copy, QrCode, TrendingUp, TrendingDown, Wallet, RefreshCw } from 'lucide-react';
+import { Copy, QrCode, TrendingUp, TrendingDown, Wallet, RefreshCw, History } from 'lucide-react';
 import { QRCodeDialog } from '@/components/QRCodeDialog';
 import { toast } from '@/hooks/use-toast';
+import { TransactionDetailsDialog } from '@/components/TransactionDetailsDialog';
+import { TransactionHistoryDialog } from '@/components/TransactionHistoryDialog';
 
 
 interface Transaction {
@@ -25,10 +26,14 @@ interface Transaction {
 
 const Dashboard = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const [selectedWallet, setSelectedWallet] = useState('base');
   const [showQRCode, setShowQRCode] = useState(false);
   const [qrAddress, setQrAddress] = useState('');
   const [wallets, setWallets] = useState<Record<string, any>>({});
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [showTransactionDetails, setShowTransactionDetails] = useState(false);
+  const [showTransactionHistory, setShowTransactionHistory] = useState(false);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -36,7 +41,8 @@ const Dashboard = () => {
         const { data } = await axiosInstance.get('/wallet/transactions');
         const transactionsArray = data.transactions || [];
         if (Array.isArray(transactionsArray)) {
-          setTransactions(transactionsArray.slice(-3));
+          setAllTransactions(transactionsArray);
+          setTransactions(transactionsArray.slice(0, 3));
         }
       } catch (error) {
         console.error('Error fetching transactions:', error);
@@ -209,14 +215,32 @@ const Dashboard = () => {
           <Card className="bg-[#1A1A1A] border-[#2C2C2C]">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-white">Recent Transactions</CardTitle>
-              <Button variant="ghost" size="sm" className="text-[#ECE147] hover:text-[#ECE147]/80">
-                <RefreshCw className="w-4 h-4" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-[#ECE147] hover:text-[#ECE147]/80"
+                  onClick={() => setShowTransactionHistory(true)}
+                >
+                  <History className="w-4 h-4" />
+                  <span className="ml-1">Full History</span>
+                </Button>
+                <Button variant="ghost" size="sm" className="text-[#ECE147] hover:text-[#ECE147]/80">
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {transactions.map((tx) => (
-                  <div key={tx.transactionId} className="flex items-center justify-between p-3 bg-[#2C2C2C] rounded-lg">
+                  <div 
+                    key={tx.transactionId} 
+                    className="flex items-center justify-between p-3 bg-[#2C2C2C] rounded-lg cursor-pointer hover:bg-[#3C3C3C] transition-colors"
+                    onClick={() => {
+                      setSelectedTransaction(tx);
+                      setShowTransactionDetails(true);
+                    }}
+                  >
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                         tx.type === 'incoming' ? 'bg-[#9AE66E]/10' : 'bg-red-400/10'
@@ -252,6 +276,18 @@ const Dashboard = () => {
                     </div>
                   </div>
                 ))}
+                
+                <TransactionDetailsDialog 
+                  isOpen={showTransactionDetails} 
+                  onClose={() => setShowTransactionDetails(false)} 
+                  transaction={selectedTransaction} 
+                />
+
+                <TransactionHistoryDialog
+                  isOpen={showTransactionHistory}
+                  onClose={() => setShowTransactionHistory(false)}
+                  transactions={allTransactions}
+                />
               </div>
             </CardContent>
           </Card>
@@ -268,12 +304,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-
-
-
-
-
-
-
-

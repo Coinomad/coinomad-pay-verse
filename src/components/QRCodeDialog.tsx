@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Copy } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import QRCode from 'react-qr-code';
 
 interface QRCodeDialogProps {
   isOpen: boolean;
@@ -27,16 +28,16 @@ export const QRCodeDialog = ({ isOpen, onClose, address }: QRCodeDialogProps) =>
         </DialogHeader>
         
         <div className="flex flex-col items-center space-y-4 py-4">
-          {/* QR Code placeholder - in a real app, you'd use a QR code library */}
-          <div className="w-48 h-48 bg-white rounded-lg flex items-center justify-center">
-            <div className="text-black text-center">
-              <div className="text-xs font-mono break-all p-4">
-                {address}
-              </div>
-              <div className="text-xs text-gray-600 mt-2">
-                QR Code would appear here
-              </div>
-            </div>
+          {/* QR Code generated using react-qr-code */}
+          <div className="w-48 h-48 bg-white rounded-lg flex items-center justify-center p-2">
+            <QRCode
+              value={address}
+              size={176} // Slightly smaller than container to ensure padding
+              style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+              level="H" // Highest error correction level
+              fgColor="#000000"
+              bgColor="#FFFFFF"
+            />
           </div>
           
           <div className="w-full">

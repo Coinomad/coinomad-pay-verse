@@ -45,7 +45,7 @@ export const Navigation = () => {
           </div>
 
           {/* Right side - Search, Notifications, Profile */}
-          <div className="flex items-center space-x-4">
+          {/* <div className="flex items-center space-x-4">
             <button className="p-2 text-[#B3B3B3] hover:text-white transition-colors">
               <Search className="w-5 h-5" />
             </button>
@@ -62,7 +62,7 @@ export const Navigation = () => {
               </Avatar>
               <ChevronDown className="w-4 h-4 text-[#B3B3B3]" />
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </nav>
