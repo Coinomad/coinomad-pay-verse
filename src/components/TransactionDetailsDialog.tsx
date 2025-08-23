@@ -6,13 +6,15 @@ import { Badge } from '@/components/ui/badge';
 
 interface Transaction {
   transactionId: string;
-  type: 'incoming' | 'withdrawal';
+  type: 'incoming' | 'outgoing';  // Change 'withdrawal' to 'outgoing'
   asset: 'USDC' | 'USDT' | 'CUSD';
   network: string;
   amount: number;
   timestamp: string;
   status: 'PENDING' | 'CONFIRMED';
   txHash: string;
+  gasFee?: number;  // Add gasFee field
+  coinomadFee?: number;  // Add coinomadFee field
 }
 
 interface TransactionDetailsDialogProps {
@@ -96,6 +98,24 @@ export const TransactionDetailsDialog = ({
               <div className="text-white font-medium">{transaction.asset} • {transaction.network}</div>
             </div>
           </div>
+          
+          {/* Fees - Only show for outgoing transactions */}
+          {transaction.type === 'outgoing' && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <div className="text-[#B3B3B3] text-sm">Gas Fee:</div>
+                <div className="text-white font-medium">
+                  ${(transaction.gasFee || 0).toLocaleString('en-US', { minimumFractionDigits: 4 })}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-[#B3B3B3] text-sm">Coinomad Fee:</div>
+                <div className="text-white font-medium">
+                  ${(transaction.coinomadFee || 0).toLocaleString('en-US', { minimumFractionDigits: 4 })}
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Timestamp */}
           <div className="space-y-1">

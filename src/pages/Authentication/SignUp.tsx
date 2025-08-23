@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Logo from '../../components/Logo'
-import { EyeIcon, EyeOffIcon, MailIcon, LockIcon, UserIcon } from 'lucide-react'
+import { EyeIcon, EyeOffIcon, MailIcon, LockIcon, UserIcon, LoaderIcon } from 'lucide-react'
+import { authAPI } from '../../Data/authAPI';
 
 export function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -18,42 +19,50 @@ export function SignupPage() {
     // Google signup implementation would go here
     console.log('Google signup clicked')
   }
+  const [isLoading, setIsLoading] = useState(false)
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Validate passwords match
-    if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match')
-      return
-    }
-
+    if (isLoading) return // Prevent multiple submissions
+    
+    setIsLoading(true)
+    
     try {
-      const response = await fetch(`http://localhost:3000/v1/api/employerauth/signup/email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          organizationName: formData.organizationName
-        }),
-      })
-
-      const data = await response.json()
-
+      const response = await authAPI.signup({
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        organizationName: formData.organizationName
+      });
+  
+      const data = response.data;
+  
       if (data.success) {
         localStorage.setItem('userId', data.userId)
-        localStorage.setItem('userEmail', formData.email) // Add this line
+        localStorage.setItem('userEmail', formData.email)
         window.location.href = '/verify-email'
       } else {
         alert(data.message || 'Signup failed')
       }
     } catch (error) {
       console.error('Signup error:', error)
-      alert('Failed to create account. Please try again.')
+      
+      // Better error handling
+      if (error.response) {
+        // Server responded with error status
+        const errorData = error.response.data;
+        alert(errorData.message || 'Signup failed. Please try again.')
+      } else if (error.request) {
+        // Request was made but no response received (network/timeout)
+        alert('Network error. Please check your connection and try again.')
+      } else {
+        // Something else happened
+        alert('An unexpected error occurred. Please try again.')
+      }
+    } finally {
+      setIsLoading(false)
     }
   }
   const handleInputChange = (field: string, value: string) => {
@@ -257,9 +266,17 @@ export function SignupPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold py-3 px-4 rounded-lg transition-colors"
+              disabled={isLoading}
+              className="w-full bg-yellow-400 hover:bg-yellow-500 disabled:opacity-50 disabled:hover:bg-yellow-400 text-gray-900 font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
-              Create Account
+              {isLoading ? (
+                <>
+                  <LoaderIcon className="w-5 h-5 animate-spin" />
+                  Creating Account...
+                </>
+              ) : (
+                'Create Account'
+              )}
             </button>
           </form>
           {/* Sign In Link */}

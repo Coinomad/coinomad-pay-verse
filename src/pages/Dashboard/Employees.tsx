@@ -40,7 +40,7 @@ interface Employee {
   position: string;
   walletAddress: string;
   asset: 'USDT' | 'USDC';
-  network: 'BASE' | 'POLYGON' | 'ETHEREUM' | 'CELO';
+  network: 'BASE' | 'POLYGON' | 'ETHEREUM';
   schedules?: Schedule[];
   scheduleTransaction?: {
     _id: string;
@@ -280,13 +280,24 @@ const handleUpdateEmployee = async () => {
     ), [employees, searchTerm]);
 
   const addEmployee = async (employeeData: Omit<Employee, 'employeeId' | 'schedules' | 'scheduleTransaction'>) => {
-    try {
-      const { data } = await axiosInstance.post('/employee/register', employeeData);
-      setEmployees(prev => [...prev, data.data]);
-    } catch (error: any) {
-      console.error('Registration failed:', error.response?.data?.message || error.message);
+  try {
+    setLoading(true);
+    
+    const { data } = await axiosInstance.post('/employee/register', employeeData);
+    
+    if (data && data.data) {
+      await fetchEmployees();
+      toast.success('Employee added successfully!');
+    } else {
+      throw new Error('Invalid response structure from server');
     }
-  };
+  } catch (error: any) {
+    console.error('Registration failed:', error.response?.data?.message || error.message);
+    toast.error(error.response?.data?.message || 'Failed to add employee. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const openScheduleDialog = (employee: Employee) => {
     setSelectedEmployee(employee);
@@ -895,11 +906,6 @@ const handleUpdateEmployee = async () => {
         onAddEmployee={addEmployee}
       />
       
-      <AddEmployeeDialog 
-        isOpen={showAddEmployee} 
-        onClose={() => setShowAddEmployee(false)} 
-        onAddEmployee={addEmployee}
-      />
       {selectedEmployee && showScheduleDialog && (
         <SchedulingModal 
           isOpen={showScheduleDialog} 

@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { MailIcon, LoaderIcon } from 'lucide-react'
+import Logo from '../../components/Logo'
+import { authAPI } from '../../Data/authAPI';
 
 export function VerifyOTPPage() {
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
@@ -9,6 +11,7 @@ export function VerifyOTPPage() {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
   const [userEmail, setUserEmail] = useState('')
   const navigate = useNavigate()
+  const [isResending, setIsResending] = useState(false)
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
@@ -48,43 +51,104 @@ export function VerifyOTPPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsVerifying(true)
+    
     try {
-      const response = await fetch(`http://localhost:3000/v1/api/employerauth/signup/verify-email`, {
-        // ${import.meta.env.VITE_SERVER_URL}
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: userEmail,
-          verificationCode: otp.join(''),
-        }),
-      })
-
-      const data = await response.json()
-      setIsVerifying(false)
-
-      if (response.ok && data.success) {
+      console.log('Attempting to verify email:', userEmail)
+      const response = await authAPI.verifyEmail({
+        email: userEmail,
+        verificationCode: otp.join(''),
+      });
+  
+      console.log('Full response:', response)
+      console.log('Response data:', response.data)
+      console.log('Response status:', response.status)
+      
+      const data = response.data;
+      
+      if (data.success) {
+        console.log('Verification successful, redirecting to login...')
         // Clear the stored email from localStorage since we don't need it anymore
         localStorage.removeItem('userEmail')
         // Navigate to login page
         navigate('/login')
       } else {
         console.error('Verification failed:', data.message)
-        // You might want to show an error message to the user here
+        alert(`Verification failed: ${data.message}`)
       }
-    } catch (error) {
-      console.error('Verification failed:', error)
+    } catch (error: any) {
+      console.error('Verification error details:', error)
+      
+      // Check if it's an axios error with response
+      if (error.response) {
+        console.log('Error response status:', error.response.status)
+        console.log('Error response data:', error.response.data)
+        
+        // If the server responded with success but axios treated it as error
+        if (error.response.status >= 200 && error.response.status < 300 && 
+            error.response.data && error.response.data.success) {
+          console.log('Server actually succeeded despite axios error, redirecting...')
+          localStorage.removeItem('userEmail')
+          navigate('/login')
+          return
+        }
+        
+        // Handle actual server errors
+        const errorMessage = error.response.data?.message || 'Server error occurred'
+        console.error('Server error:', errorMessage)
+        alert(`Verification failed: ${errorMessage}`)
+      } else if (error.request) {
+        // This is a true network error (no response received)
+        console.error('Network error - no response received:', error.request)
+        alert('Network error: Unable to connect to server. Please check your internet connection and try again.')
+      } else {
+        // Something else happened
+        console.error('Unexpected error:', error.message)
+        alert(`Unexpected error: ${error.message}`)
+      }
+    } finally {
       setIsVerifying(false)
-      // You might want to show an error message to the user here
     }
   }
 
-  const handleResendCode = () => {
-    if (resendTimer === 0) {
-      // Simulate sending new code
-      console.log('Resending code to:', userEmail)
-      setResendTimer(30)
+  const handleResendCode = async () => {
+    if (resendTimer === 0 && !isResending) {
+      setIsResending(true)
+      try {
+        console.log('Resending code to:', userEmail)
+        console.log('API URL:', import.meta.env.VITE_API_URL || 'http://localhost:3000/v1/api')
+        
+        const response = await authAPI.resendVerificationCode(userEmail)
+        
+        if (response.data.success) {
+          console.log('Verification code resent successfully')
+          setResendTimer(30)
+          // Success prompt instead of alert
+          console.log('✅ Verification code sent successfully to', userEmail)
+        } else {
+          console.error('Failed to resend code:', response.data.message)
+          // Keep error handling but remove alert
+          console.error('❌ Failed to resend code:', response.data.message)
+        }
+      } catch (error) {
+        console.error('Error resending code:', error)
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response,
+          request: error.request,
+          config: error.config
+        })
+        
+        if (error.response) {
+          const errorMessage = error.response.data?.message || 'Server error occurred'
+          console.error('❌ Failed to resend code:', errorMessage)
+        } else if (error.request) {
+          console.error('❌ Network error: Unable to connect to server at', error.config?.baseURL, '. Please check if the backend server is running.')
+        } else {
+          console.error('❌ Unexpected error:', error.message)
+        }
+      } finally {
+        setIsResending(false)
+      }
     }
   }
 
@@ -93,12 +157,7 @@ export function VerifyOTPPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-              <span className="text-gray-900 font-bold text-lg">C</span>
-            </div>
-            <span className="text-white text-xl font-semibold">Coinomad</span>
-          </div>
+          <Logo />
         </div>
         {/* Verification Form */}
         <div className="bg-gray-800 rounded-xl p-8 shadow-2xl">
@@ -148,12 +207,19 @@ export function VerifyOTPPage() {
             </p>
             <button
               onClick={handleResendCode}
-              disabled={resendTimer > 0}
-              className="text-yellow-400 hover:text-yellow-300 disabled:text-gray-500 text-sm font-medium transition-colors"
+              disabled={resendTimer > 0 || isResending}
+              className="text-yellow-400 hover:text-yellow-300 disabled:text-gray-500 text-sm font-medium transition-colors flex items-center justify-center gap-2"
             >
-              {resendTimer > 0
-                ? `Resend code in ${resendTimer}s`
-                : 'Resend code'}
+              {isResending ? (
+                <>
+                  <LoaderIcon className="w-4 h-4 animate-spin" />
+                  Sending...
+                </>
+              ) : resendTimer > 0 ? (
+                `Resend code in ${resendTimer}s`
+              ) : (
+                'Resend code'
+              )}
             </button>
           </div>
           <div className="mt-6 text-center">

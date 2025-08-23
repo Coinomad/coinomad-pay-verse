@@ -15,13 +15,15 @@ import { TransactionHistoryDialog } from '@/components/TransactionHistoryDialog'
 
 interface Transaction {
   transactionId: string;
-  type: 'incoming' | 'withdrawal';
+  type: 'incoming' | 'outgoing';  // Change 'withdrawal' to 'outgoing'
   asset: 'USDC' | 'USDT' | 'CUSD';
   network: string;
   amount: number;
   timestamp: string;
   status: 'PENDING' | 'CONFIRMED';
   txHash: string;
+  gasFee?: number;  // Add gasFee field
+  coinomadFee?: number;  // Add coinomadFee field
 }
 
 const Dashboard = () => {
@@ -264,6 +266,7 @@ const Dashboard = () => {
                       }`}>
                         {tx.type === 'incoming' ? '+' : '-'}${tx.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                       </div>
+                      {/* Remove the gas fee display section */}
                       <div className="flex items-center gap-2">
                         <Badge variant={tx.status === 'CONFIRMED' ? 'default' : 'secondary'}
                                className={tx.status === 'CONFIRMED' ? 'bg-[#9AE66E]/10 text-[#9AE66E]' : 'bg-yellow-400/10 text-yellow-400'}>

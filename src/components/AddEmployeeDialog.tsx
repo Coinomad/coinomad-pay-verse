@@ -30,10 +30,9 @@ export const AddEmployeeDialog = ({ isOpen, onClose, onAddEmployee }: AddEmploye
   });
 
   const networks = [
-    { id: 'base', name: 'Base', assets: ['USDT', 'USDC'] },
-    { id: 'ethereum', name: 'Ethereum', assets: ['USDT', 'USDC'] },
-    { id: 'polygon', name: 'Polygon', assets: ['USDT', 'USDC'] },
-    { id: 'celo', name: 'Celo', assets: ['CUSD'] }
+    { id: 'BASE', name: 'Base', assets: ['USDT', 'USDC'] },
+    { id: 'ETHEREUM', name: 'Ethereum', assets: ['USDT', 'USDC'] },
+    { id: 'POLYGON', name: 'Polygon', assets: ['USDT', 'USDC'] },
   ];
 
   const selectedNetwork = networks.find(n => n.id === formData.network);
