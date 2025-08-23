@@ -73,7 +73,7 @@ export function LoginPage() {
             </div>
           )}
           {/* Google Login Button */}
-          <button
+          {/* <button
             onClick={handleGoogleLogin}
             className="w-full bg-white hover:bg-gray-50 text-gray-900 font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-3 mb-6 transition-colors"
           >
@@ -83,7 +83,7 @@ export function LoginPage() {
               className="w-5 h-5"
             />
             Continue with Google
-          </button>
+          </button> */}
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-600"></div>
