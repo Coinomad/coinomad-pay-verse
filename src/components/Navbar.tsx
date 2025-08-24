@@ -125,13 +125,10 @@ const Navbar = () => {
                   className="bg-coinomad-primary hover:bg-coinomad-primary text-black font-medium w-full neon-glow-primary hover:scale-105 transition-transform duration-200"
                   onClick={() => {
                     setIsMenuOpen(false);
-                    const element = document.getElementById('waitlist');
-                    if (element) {
-                      element.scrollIntoView({ behavior: 'smooth' });
-                    }
+                    navigate('/signup');
                   }}
                 >
-                  Waitlist
+                  Sign Up
                 </Button>
               </li>
             </ul>

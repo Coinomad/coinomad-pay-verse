@@ -134,9 +134,9 @@ const Employees = () => {
           // Show warnings if any
           if (response.data.warnings && response.data.warnings.length > 0) {
             console.warn('Deletion warnings:', response.data.warnings);
-            alert(`Schedule deleted with warnings:\n${response.data.warnings.join('\n')}`);
+           
           } else {
-            alert('Schedule deleted successfully!');
+           
           }
           
           // Refresh the employees list to reflect the changes
