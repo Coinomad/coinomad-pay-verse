@@ -176,10 +176,10 @@ const Dashboard = () => {
                               <div className="w-10 h-10 bg-[#ECE147]/10 rounded-full flex items-center justify-center">
                                   <span className="flex items-center gap-1">
                                     {asset === 'USDC' && (
-                                      <img src="/src/assets/usdc.png" alt="USDC" className="w-10 inline-block" />
+                                      <img src="/usdc.png" alt="USDC" className="w-10 inline-block" />
                                     )}
                                     {asset === 'USDT' && (
-                                      <img src="/src/assets/usdt.png" alt="USDT" className="w-10 inline-block" />
+                                      <img src="/usdt.png" alt="USDT" className="w-10 inline-block" />
                                     )}
                                   </span>
                                 </div>
