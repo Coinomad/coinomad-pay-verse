@@ -80,10 +80,10 @@ export const SchedulingModal: React.FC<SchedulingModalProps> = ({
             </div>
             <div className="flex space-x-2">
               <span className="bg-yellow-800 text-yellow-300 px-3 py-1 rounded text-sm">
-                USDC
+                {employee.asset || 'USDC'}
               </span>
               <span className="bg-green-800 text-green-300 px-3 py-1 rounded text-sm">
-                BASE
+                {employee.network || 'BASE'}
               </span>
             </div>
           </div>
