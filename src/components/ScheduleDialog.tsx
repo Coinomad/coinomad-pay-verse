@@ -21,7 +21,9 @@ export type Schedule = {
 export interface Employee {
   employeeId: string
   name: string
+  email: string
   position: string
+  walletAddress: string
   asset?: string
   network?: string
 }
@@ -37,7 +39,7 @@ export const SchedulingModal: React.FC<SchedulingModalProps> = ({
   isOpen,
   onClose,
   employee,
-  onRefresh, // Add this
+  onRefresh,
 }) => {
   const [paymentType, setPaymentType] = useState<PaymentType>('recurring')
   const [schedules, setSchedules] = useState<Schedule[]>([])
@@ -48,9 +50,14 @@ export const SchedulingModal: React.FC<SchedulingModalProps> = ({
       id: Math.random().toString(36).substr(2, 9),
     }
     setSchedules([...schedules, newSchedule as Schedule])
-    //onAddSchedule(newSchedule as Schedule)
   }
-  
+
+  // Handle successful schedule creation
+  const handleScheduleSuccess = () => {
+    onRefresh?.() // Refresh the employee data
+    onClose() // Close the schedule dialog
+  }
+
   const handleDeleteSchedule = (scheduleId: string) => {
     setSchedules(schedules.filter(schedule => schedule.id !== scheduleId))
   }
@@ -58,7 +65,7 @@ export const SchedulingModal: React.FC<SchedulingModalProps> = ({
   if (!isOpen) return null
   
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-black rounded-lg w-full max-w-2xl max-h-[90vh] text-white overflow-hidden flex flex-col">
         {/* Header - Fixed */}
         <div className="flex justify-between items-center p-6 border-b border-gray-700">
@@ -103,9 +110,17 @@ export const SchedulingModal: React.FC<SchedulingModalProps> = ({
             />
             <div className="mt-4">
               {paymentType === 'specific' ? (
-                <SpecificPaymentForm onAddSchedule={handleAddSchedule} employee={employee} />
+                <SpecificPaymentForm 
+                  onAddSchedule={handleAddSchedule} 
+                  onSuccess={handleScheduleSuccess} // Add this prop
+                  employee={employee} 
+                />
               ) : (
-                <RecurringPaymentForm onAddSchedule={handleAddSchedule} employee={employee} />
+                <RecurringPaymentForm 
+                  onAddSchedule={handleAddSchedule} 
+                  onSuccess={handleScheduleSuccess} // Add this prop
+                  employee={employee} 
+                />
               )}
             </div>
           </div>

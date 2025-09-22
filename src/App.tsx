@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Index from "./pages/Index";
 import { VerifyOTPPage } from "./pages/Authentication/VerifyEmail";
 import { SignupPage } from "./pages/Authentication/SignUp";
@@ -23,6 +25,31 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <ToastContainer 
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        toastStyle={{
+          backgroundColor: '#1A1A1A',
+          color: '#FFFFFF',
+          border: '1px solid #2C2C2C',
+          borderRadius: '8px',
+          fontFamily: 'Space Grotesk, sans-serif',
+          fontSize: '14px',
+          fontWeight: '500',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+        }}
+        toastClassName="custom-toast"
+        className="custom-toast-body"
+        progressClassName="custom-toast-progress"
+      />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import PaymentConfirmationDialog from './PaymentConfirmationDialog' // Add this import
 import {
   CalendarIcon,
   PlusIcon,
@@ -9,6 +10,7 @@ import {
 import { Schedule } from './ScheduleDialog'
 import axiosInstance from '../Data/axiosInstance'
 import { jwtDecode } from 'jwt-decode'
+import { toast } from 'react-toastify' // Add this import
 
 // Add interface for JWT payload
 interface JWTPayload {
@@ -20,15 +22,21 @@ interface JWTPayload {
 
 interface SpecificPaymentFormProps {
   onAddSchedule: (schedule: Omit<Schedule, 'id'>) => void
+  onSuccess?: () => void // Add this prop to close parent dialog
   employee?: { 
     employeeId: string
     asset?: string
     network?: string
+    name?: string
+    email?: string
+    walletAddress?: string
+    position?: string
   }
 }
 
 export const SpecificPaymentForm: React.FC<SpecificPaymentFormProps> = ({
   onAddSchedule,
+  onSuccess, // Add this
   employee,
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -43,6 +51,8 @@ export const SpecificPaymentForm: React.FC<SpecificPaymentFormProps> = ({
   const [showCalendar, setShowCalendar] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [showConfirmation, setShowConfirmation] = useState(false) // Add this state
+  const [pendingPaymentData, setPendingPaymentData] = useState<any>(null) // Add this state
   
   // Common timezones for the dropdown
   const commonTimezones = [
@@ -232,7 +242,8 @@ export const SpecificPaymentForm: React.FC<SpecificPaymentFormProps> = ({
       return null
     }
   }
-  
+
+  // Modified handleSubmit to show confirmation dialog instead of directly submitting
   const handleSubmit = async () => {
     // Add debugging to see what we're getting
     console.log('Employee data:', employee)
@@ -278,39 +289,59 @@ export const SpecificPaymentForm: React.FC<SpecificPaymentFormProps> = ({
       setError('Scheduled time must be in the future')
       return
     }
+
+    // Instead of directly submitting, show confirmation dialog
+    const paymentData = {
+      employee: {
+        employeeId: employee.employeeId,
+        name: employee.name,
+        email: employee.email,
+        walletAddress: employee.walletAddress,
+        asset: employee.asset || asset,
+        network: employee.network || 'BASE',
+        position: employee.position
+      },
+      paymentDetails: {
+        amount: parseFloat(amount),
+        asset: asset.toLowerCase(),
+        network: (employee.network || 'base').toLowerCase(),
+        scheduleType: 'specific',
+        scheduledDateTime: scheduledUTC.toISOString()
+      }
+    }
+
+    setPendingPaymentData(paymentData)
+    setShowConfirmation(true)
+  }
+
+  // Handle confirmed payment submission
+  const handleConfirmPayment = async () => {
+    if (!pendingPaymentData) return
     
     setIsSubmitting(true)
     setError('')
     
     try {
-      // Convert local time to UTC
-      const utcDateTime = convertLocalTimeToUTC(selectedDate, localTime, selectedTimezone)
-      
-      // Prepare the API payload with UTC time
+      // Prepare the API payload
       const payload = {
-        employeeId: employee.employeeId,
-        amount: parseFloat(amount),
-        asset: asset.toLowerCase(),
-        network: (employee.network || 'base').toLowerCase(),
+        employeeId: pendingPaymentData.employee.employeeId,
+        amount: pendingPaymentData.paymentDetails.amount,
+        asset: pendingPaymentData.paymentDetails.asset,
+        network: pendingPaymentData.paymentDetails.network,
         scheduleType: 'specific',
-        scheduledDateTime: utcDateTime.toISOString()
+        scheduledDateTime: pendingPaymentData.paymentDetails.scheduledDateTime
       }
       
-      console.log('=== TIMEZONE CONVERSION DEBUG ===')
-      console.log('User timezone:', selectedTimezone)
-      console.log('Local time entered:', localTime)
-      console.log('Local date:', selectedDate.toDateString())
-      console.log('Current local time:', getCurrentLocalTime())
-      console.log('Converted UTC time:', utcDateTime.toISOString())
+      console.log('=== PAYMENT CONFIRMATION ===')
       console.log('Payload:', payload)
-      console.log('=================================')
+      console.log('============================')
       
       // Call the backend API
       const response = await axiosInstance.post('/wallet/schedule-transaction/', payload)
       
       if (response.data.success) {
         // Format date for display
-        const formattedDate = selectedDate.toLocaleDateString('en-US', {
+        const formattedDate = selectedDate?.toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'short',
           day: 'numeric',
@@ -322,21 +353,37 @@ export const SpecificPaymentForm: React.FC<SpecificPaymentFormProps> = ({
           amount,
           asset,
           status: 'Scheduled',
-          date: formattedDate,
-          time: `${localTime} (${selectedTimezone})`,
+          date: formattedDate || '',
+          time: `${getFormattedTime()} (${selectedTimezone})`,
         })
         
-        // Reset form
+        // Show success toast
+        toast.success(`🎉 Payment scheduled successfully for ${employee?.name || 'employee'}!`, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          className: 'custom-toast',
+        })
+        
+        // Reset form and close confirmation
         setSelectedDate(null)
         setSelectedHour('12')
         setSelectedMinute('00')
         setAmount('')
+        setShowConfirmation(false)
+        setPendingPaymentData(null)
+        
+        // Close parent dialog (ScheduleDialog)
+        onSuccess?.()
         
         console.log('Transaction scheduled successfully:', response.data)
       } else {
         setError(response.data.message || 'Failed to schedule transaction')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error scheduling transaction:', error)
       if (error.response?.data?.message) {
         setError(error.response.data.message)
@@ -347,7 +394,13 @@ export const SpecificPaymentForm: React.FC<SpecificPaymentFormProps> = ({
       setIsSubmitting(false)
     }
   }
-  
+
+  // Handle confirmation dialog cancellation
+  const handleCancelConfirmation = () => {
+    setShowConfirmation(false)
+    setPendingPaymentData(null)
+  }
+
   const days = generateCalendarDays()
   const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const currentMonthDisplay = new Date(
@@ -582,22 +635,21 @@ export const SpecificPaymentForm: React.FC<SpecificPaymentFormProps> = ({
               <div className="flex items-center justify-between">
                 <span className="text-white font-medium">{employee?.asset || 'USDC'}</span>
                 <div className="bg-green-800 text-green-300 px-2 py-1 rounded text-xs">
-                  Registered
+                  Fixed
                 </div>
               </div>
             </div>
           </div>
         </div>
         
-        {/* Network Display */}
         <div>
           <label className="block text-sm text-gray-400 mb-1">Network</label>
           <div className="relative">
             <div className="w-full bg-[#2C2C2C] rounded-lg px-4 py-2 border border-gray-600">
               <div className="flex items-center justify-between">
-                <span className="text-white font-medium">{employee?.network || 'Base'}</span>
-                <div className="bg-blue-800 text-blue-300 px-2 py-1 rounded text-xs">
-                  Network
+                <span className="text-white font-medium">{employee?.network || 'BASE'}</span>
+                <div className="bg-green-800 text-green-300 px-2 py-1 rounded text-xs">
+                  Fixed
                 </div>
               </div>
             </div>
@@ -608,24 +660,37 @@ export const SpecificPaymentForm: React.FC<SpecificPaymentFormProps> = ({
       {/* Submit Button */}
       <button
         onClick={handleSubmit}
-        disabled={!selectedDate || !amount || isSubmitting}
-        className={`w-full py-3 rounded-lg flex items-center justify-center space-x-2 
-          ${!selectedDate || !amount || isSubmitting 
-            ? 'bg-gray-600 text-gray-400 cursor-not-allowed' 
-            : 'bg-yellow-600 hover:bg-yellow-700 text-white'}`}
+        disabled={isSubmitting || !selectedDate || !amount || !employee}
+        className={`w-full py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+          isSubmitting || !selectedDate || !amount || !employee
+            ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+            : 'bg-blue-600 hover:bg-blue-700 text-white'
+        }`}
       >
         {isSubmitting ? (
           <>
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-            <span>Scheduling...</span>
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            Scheduling...
           </>
         ) : (
           <>
             <PlusIcon size={18} />
-            <span>Schedule Payment</span>
+            Schedule Payment
           </>
         )}
       </button>
+
+      {/* Add the confirmation dialog */}
+      {showConfirmation && pendingPaymentData && (
+        <PaymentConfirmationDialog
+          isOpen={showConfirmation}
+          onClose={handleCancelConfirmation}
+          onConfirm={handleConfirmPayment}
+          employee={pendingPaymentData.employee}
+          paymentDetails={pendingPaymentData.paymentDetails}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </div>
   )
 }

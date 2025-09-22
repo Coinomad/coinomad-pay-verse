@@ -134,9 +134,17 @@ const Employees = () => {
           // Show warnings if any
           if (response.data.warnings && response.data.warnings.length > 0) {
             console.warn('Deletion warnings:', response.data.warnings);
-           
+            toast.success('Schedule deleted successfully', {
+              position: "top-right",
+              autoClose: 3000,
+              className: "custom-toast"
+            });
           } else {
-           
+            toast.success('Schedule deleted successfully!', {
+              position: "top-right",
+              autoClose: 3000,
+              className: "custom-toast"
+            });
           }
           
           // Refresh the employees list to reflect the changes
@@ -165,7 +173,11 @@ const Employees = () => {
           })
         );
         
-        alert('Local schedule deleted successfully!');
+        toast.success('Local schedule deleted successfully!', {
+          position: "top-right",
+          autoClose: 3000,
+          className: "custom-toast"
+        });
       }
       
     } catch (error: any) {
@@ -173,7 +185,11 @@ const Employees = () => {
       
       // Show user-friendly error message
       const errorMessage = error.response?.data?.message || error.message || 'Failed to delete schedule';
-      alert(`Error deleting schedule: ${errorMessage}`);
+      toast.error(`Error deleting schedule: ${errorMessage}`, {
+        position: "top-right",
+        autoClose: 5000,
+        className: "custom-toast"
+      });
     } finally {
       setShowDeleteDialog(false);
       setScheduleToDelete(null);
@@ -913,7 +929,9 @@ const handleUpdateEmployee = async () => {
           employee={{
             employeeId: selectedEmployee.employeeId,
             name: selectedEmployee.name,
+            email: selectedEmployee.email,
             position: selectedEmployee.position,
+            walletAddress: selectedEmployee.walletAddress,
             asset: selectedEmployee.asset,
             network: selectedEmployee.network
           }}

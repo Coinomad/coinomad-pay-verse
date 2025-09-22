@@ -3,6 +3,8 @@ import { PlusIcon, ClockIcon } from 'lucide-react'
 import { Schedule } from './ScheduleDialog'
 import axiosInstance from '../Data/axiosInstance'
 import { jwtDecode } from 'jwt-decode'
+import { toast } from 'react-toastify'
+import PaymentConfirmationDialog from './PaymentConfirmationDialog'
 
 // Add interface for JWT payload
 interface JWTPayload {
@@ -14,15 +16,21 @@ interface JWTPayload {
 
 interface RecurringPaymentFormProps {
   onAddSchedule: (schedule: Omit<Schedule, 'id'>) => void
+  onSuccess?: () => void
   employee?: { 
     employeeId: string
     asset?: string
     network?: string
+    name?: string
+    email?: string
+    walletAddress?: string
+    position?: string
   }
 }
 
 export const RecurringPaymentForm: React.FC<RecurringPaymentFormProps> = ({
   onAddSchedule,
+  onSuccess,
   employee,
 }) => {
   const [frequency, setFrequency] = useState('')
@@ -37,6 +45,7 @@ export const RecurringPaymentForm: React.FC<RecurringPaymentFormProps> = ({
   const [status, setStatus] = useState('Active')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [showConfirmation, setShowConfirmation] = useState(false)
   
   // Common timezones for the dropdown
   const commonTimezones = [
@@ -94,6 +103,52 @@ export const RecurringPaymentForm: React.FC<RecurringPaymentFormProps> = ({
     }
   }
   
+  // Calculate next execution time for display
+  const getNextExecutionTime = () => {
+    try {
+      const now = new Date()
+      const nextExecution = new Date()
+      
+      // Set the time
+      nextExecution.setHours(parseInt(selectedHour), parseInt(selectedMinute), 0, 0)
+      
+      // Calculate next execution based on frequency
+      if (frequency === 'daily') {
+        // If time has passed today, schedule for tomorrow
+        if (nextExecution <= now) {
+          nextExecution.setDate(nextExecution.getDate() + 1)
+        }
+      } else if (frequency === 'weekly') {
+        const dayMap = {
+          'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3,
+          'thursday': 4, 'friday': 5, 'saturday': 6
+        }
+        const targetDay = dayMap[day.toLowerCase()]
+        const currentDay = now.getDay()
+        
+        let daysUntilNext = targetDay - currentDay
+        if (daysUntilNext < 0 || (daysUntilNext === 0 && nextExecution <= now)) {
+          daysUntilNext += 7
+        }
+        
+        nextExecution.setDate(nextExecution.getDate() + daysUntilNext)
+      } else if (frequency === 'monthly') {
+        const targetDate = parseInt(day)
+        nextExecution.setDate(targetDate)
+        
+        // If the date has passed this month or is today but time has passed
+        if (nextExecution <= now) {
+          nextExecution.setMonth(nextExecution.getMonth() + 1)
+          nextExecution.setDate(targetDate)
+        }
+      }
+      
+      return nextExecution.toISOString()
+    } catch (error) {
+      return new Date().toISOString()
+    }
+  }
+  
   // Validation function for time inputs
   const validateTimeInput = (value: string, type: 'hour' | 'minute') => {
     const num = parseInt(value)
@@ -122,7 +177,8 @@ export const RecurringPaymentForm: React.FC<RecurringPaymentFormProps> = ({
     }
   }
   
-  const handleSubmit = async () => {
+  // Handle form submission - show confirmation dialog
+  const handleFormSubmit = () => {
     // Get employerId from JWT token
     const employerId = getEmployerIdFromToken()
     if (!employerId) {
@@ -143,6 +199,20 @@ export const RecurringPaymentForm: React.FC<RecurringPaymentFormProps> = ({
     
     if (parseFloat(amount) <= 0) {
       setError('Please enter a valid amount')
+      return
+    }
+    
+    // Clear error and show confirmation dialog
+    setError('')
+    setShowConfirmation(true)
+  }
+  
+  // Handle confirmed payment submission
+  const handleConfirmedSubmit = async () => {
+    // Get employerId from JWT token
+    const employerId = getEmployerIdFromToken()
+    if (!employerId) {
+      setError('Unable to get employer information. Please log in again.')
       return
     }
     
@@ -207,12 +277,29 @@ export const RecurringPaymentForm: React.FC<RecurringPaymentFormProps> = ({
           status: 'Active',
         })
         
+        // Show success toast
+        toast.success(`🔄 Recurring payment scheduled successfully for ${employee?.name || 'employee'}!`, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          className: 'custom-toast',
+        })
+        
         // Reset form
         setFrequency('')
         setDay('')
         setSelectedHour('12')
         setSelectedMinute('00')
         setAmount('')
+        
+        // Close confirmation dialog
+        setShowConfirmation(false)
+        
+        // Close parent dialog (ScheduleDialog)
+        onSuccess?.()
         
         console.log('Recurring payment scheduled successfully:', response.data)
       } else {
@@ -261,228 +348,248 @@ export const RecurringPaymentForm: React.FC<RecurringPaymentFormProps> = ({
   }
 
   return (
-    <div className="space-y-4">
-      {error && (
-        <div className="bg-red-900/20 border border-red-500 text-red-300 px-4 py-2 rounded-lg text-sm">
-          {error}
-        </div>
-      )}
-      
-      <div>
-        <label className="block text-sm text-gray-400 mb-1">Frequency</label>
-        <div className="relative">
-          <select
-            value={frequency}
-            onChange={(e) => {
-              setFrequency(e.target.value)
-              setDay('') // Reset day when frequency changes
-            }}
-            className="w-full bg-[#2C2C2C] rounded-lg px-4 py-2 outline-none appearance-none"
-          >
-            <option value="" disabled>Select frequency</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-          </select>
-        </div>
-      </div>
-      
-      {frequency && frequency !== 'daily' && (
+    <>
+      <div className="space-y-4">
+        {error && (
+          <div className="bg-red-900/20 border border-red-500 text-red-300 px-4 py-2 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+        
         <div>
-          <label className="block text-sm text-gray-400 mb-1">
-            {frequency === 'weekly' ? 'Day of Week' : 'Day of Month'}
-          </label>
+          <label className="block text-sm text-gray-400 mb-1">Frequency</label>
           <div className="relative">
             <select
-              value={day}
-              onChange={(e) => setDay(e.target.value)}
+              value={frequency}
+              onChange={(e) => {
+                setFrequency(e.target.value)
+                setDay('') // Reset day when frequency changes
+              }}
               className="w-full bg-[#2C2C2C] rounded-lg px-4 py-2 outline-none appearance-none"
             >
-              <option value="" disabled>Select day</option>
-              {getDayOptions().map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
+              <option value="" disabled>Select frequency</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
             </select>
           </div>
         </div>
-      )}
-      
-      {/* Timezone Selection */}
-      <div>
-        <label className="block text-sm text-gray-400 mb-1">Your Timezone</label>
-        <div className="relative">
-          <select
-            value={selectedTimezone}
-            onChange={(e) => setSelectedTimezone(e.target.value)}
-            className="w-full bg-[#2C2C2C] rounded-lg px-4 py-2 outline-none appearance-none"
-          >
-            {commonTimezones.map((tz) => (
-              <option key={tz.value} value={tz.value}>
-                {tz.label}
-              </option>
-            ))}
-          </select>
-          <div className="text-xs text-gray-500 mt-1">
-            Current time in {selectedTimezone}: {getCurrentLocalTime()}
+        
+        {frequency && frequency !== 'daily' && (
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">
+              {frequency === 'weekly' ? 'Day of Week' : 'Day of Month'}
+            </label>
+            <div className="relative">
+              <select
+                value={day}
+                onChange={(e) => setDay(e.target.value)}
+                className="w-full bg-[#2C2C2C] rounded-lg px-4 py-2 outline-none appearance-none"
+              >
+                <option value="" disabled>Select day</option>
+                {getDayOptions().map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+        
+        {/* Timezone Selection */}
+        <div>
+          <label className="block text-sm text-gray-400 mb-1">Your Timezone</label>
+          <div className="relative">
+            <select
+              value={selectedTimezone}
+              onChange={(e) => setSelectedTimezone(e.target.value)}
+              className="w-full bg-[#2C2C2C] rounded-lg px-4 py-2 outline-none appearance-none"
+            >
+              {commonTimezones.map((tz) => (
+                <option key={tz.value} value={tz.value}>
+                  {tz.label}
+                </option>
+              ))}
+            </select>
+            <div className="text-xs text-gray-500 mt-1">
+              Current time in {selectedTimezone}: {getCurrentLocalTime()}
+            </div>
           </div>
         </div>
-      </div>
-      
-      {/* Time Selection */}
-      <div>
-        <label className="block text-sm text-gray-400 mb-1">Execution Time</label>
-        <div className="relative">
-          <div className="flex items-center bg-[#2C2C2C] rounded-lg px-4 py-2 gap-2">
-            <ClockIcon size={18} className="text-gray-400" />
+        
+        {/* Time Selection */}
+        <div>
+          <label className="block text-sm text-gray-400 mb-1">Execution Time</label>
+          <div className="relative">
+            <div className="flex items-center bg-[#2C2C2C] rounded-lg px-4 py-2 gap-2">
+              <ClockIcon size={18} className="text-gray-400" />
+              
+              {/* Hour Input */}
+              <input
+                type="text"
+                value={selectedHour}
+                onChange={handleHourChange}
+                placeholder="HH"
+                maxLength={2}
+                className="bg-transparent w-8 text-center outline-none"
+                onBlur={(e) => {
+                  const value = e.target.value
+                  if (value && validateTimeInput(value, 'hour')) {
+                    setSelectedHour(value.padStart(2, '0'))
+                  } else if (!value) {
+                    setSelectedHour('00')
+                  }
+                }}
+              />
+              
+              <span className="text-gray-400">:</span>
+              
+              {/* Minute Input */}
+              <input
+                type="text"
+                value={selectedMinute}
+                onChange={handleMinuteChange}
+                placeholder="MM"
+                maxLength={2}
+                className="bg-transparent w-8 text-center outline-none"
+                onBlur={(e) => {
+                  const value = e.target.value
+                  if (value && validateTimeInput(value, 'minute')) {
+                    setSelectedMinute(value.padStart(2, '0'))
+                  } else if (!value) {
+                    setSelectedMinute('00')
+                  }
+                }}
+              />
+              
+              {/* Quick Time Buttons */}
+              <div className="flex gap-1 ml-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedHour('09')
+                    setSelectedMinute('00')
+                  }}
+                  className="text-xs px-2 py-1 bg-gray-600 hover:bg-gray-500 rounded transition-colors"
+                >
+                  9AM
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedHour('12')
+                    setSelectedMinute('00')
+                  }}
+                  className="text-xs px-2 py-1 bg-gray-600 hover:bg-gray-500 rounded transition-colors"
+                >
+                  12PM
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedHour('17')
+                    setSelectedMinute('00')
+                  }}
+                  className="text-xs px-2 py-1 bg-gray-600 hover:bg-gray-500 rounded transition-colors"
+                >
+                  5PM
+                </button>
+              </div>
+            </div>
             
-            {/* Hour Input */}
+            {/* Time format hint */}
+            <div className="text-xs text-gray-500 mt-1">
+              Enter time in your local timezone (24-hour format)
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <label className="block text-sm text-gray-400 mb-1">Amount</label>
+          <div className="relative">
             <input
-              type="text"
-              value={selectedHour}
-              onChange={handleHourChange}
-              placeholder="HH"
-              maxLength={2}
-              className="bg-transparent w-8 text-center outline-none"
-              onBlur={(e) => {
-                const value = e.target.value
-                if (value && validateTimeInput(value, 'hour')) {
-                  setSelectedHour(value.padStart(2, '0'))
-                } else if (!value) {
-                  setSelectedHour('00')
-                }
-              }}
+              type="number"
+              step="0.01"
+              min="0"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.00"
+              className="w-full bg-[#2C2C2C] rounded-lg px-4 py-2 outline-none"
             />
-            
-            <span className="text-gray-400">:</span>
-            
-            {/* Minute Input */}
-            <input
-              type="text"
-              value={selectedMinute}
-              onChange={handleMinuteChange}
-              placeholder="MM"
-              maxLength={2}
-              className="bg-transparent w-8 text-center outline-none"
-              onBlur={(e) => {
-                const value = e.target.value
-                if (value && validateTimeInput(value, 'minute')) {
-                  setSelectedMinute(value.padStart(2, '0'))
-                } else if (!value) {
-                  setSelectedMinute('00')
-                }
-              }}
-            />
-            
-            {/* Quick Time Buttons */}
-            <div className="flex gap-1 ml-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedHour('09')
-                  setSelectedMinute('00')
-                }}
-                className="text-xs px-2 py-1 bg-gray-600 hover:bg-gray-500 rounded transition-colors"
-              >
-                9AM
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedHour('12')
-                  setSelectedMinute('00')
-                }}
-                className="text-xs px-2 py-1 bg-gray-600 hover:bg-gray-500 rounded transition-colors"
-              >
-                12PM
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedHour('17')
-                  setSelectedMinute('00')
-                }}
-                className="text-xs px-2 py-1 bg-gray-600 hover:bg-gray-500 rounded transition-colors"
-              >
-                5PM
-              </button>
+          </div>
+        </div>
+        
+        {/* Asset and Network Display */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Asset</label>
+            <div className="relative">
+              <div className="w-full bg-[#2C2C2C] rounded-lg px-4 py-2 border border-gray-600">
+                <div className="flex items-center justify-between">
+                  <span className="text-white font-medium">{employee?.asset || 'USDC'}</span>
+                  <div className="bg-green-800 text-green-300 px-2 py-1 rounded text-xs">
+                    Registered
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           
-          {/* Time format hint */}
-          <div className="text-xs text-gray-500 mt-1">
-            Enter time in your local timezone (24-hour format)
-          </div>
-        </div>
-      </div>
-      
-      <div>
-        <label className="block text-sm text-gray-400 mb-1">Amount</label>
-        <div className="relative">
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="0.00"
-            className="w-full bg-[#2C2C2C] rounded-lg px-4 py-2 outline-none"
-          />
-        </div>
-      </div>
-      
-      {/* Asset and Network Display */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm text-gray-400 mb-1">Asset</label>
-          <div className="relative">
-            <div className="w-full bg-[#2C2C2C] rounded-lg px-4 py-2 border border-gray-600">
-              <div className="flex items-center justify-between">
-                <span className="text-white font-medium">{employee?.asset || 'USDC'}</span>
-                <div className="bg-green-800 text-green-300 px-2 py-1 rounded text-xs">
-                  Registered
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Network</label>
+            <div className="relative">
+              <div className="w-full bg-[#2C2C2C] rounded-lg px-4 py-2 border border-gray-600">
+                <div className="flex items-center justify-between">
+                  <span className="text-white font-medium">{employee?.network || 'Base'}</span>
+                  <div className="bg-blue-800 text-blue-300 px-2 py-1 rounded text-xs">
+                    Network
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
         
-        <div>
-          <label className="block text-sm text-gray-400 mb-1">Network</label>
-          <div className="relative">
-            <div className="w-full bg-[#2C2C2C] rounded-lg px-4 py-2 border border-gray-600">
-              <div className="flex items-center justify-between">
-                <span className="text-white font-medium">{employee?.network || 'Base'}</span>
-                <div className="bg-blue-800 text-blue-300 px-2 py-1 rounded text-xs">
-                  Network
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <button
+          onClick={handleFormSubmit}
+          disabled={!frequency || !amount || (frequency !== 'daily' && !day)}
+          className={`w-full py-3 rounded-lg flex items-center justify-center space-x-2 
+            ${!frequency || !amount || (frequency !== 'daily' && !day)
+              ? 'bg-gray-600 text-gray-400 cursor-not-allowed' 
+              : 'bg-yellow-600 hover:bg-yellow-700 text-white'}`}
+        >
+          <PlusIcon size={18} />
+          <span>Review Recurring Schedule</span>
+        </button>
       </div>
-      
-      <button
-        onClick={handleSubmit}
-        disabled={!frequency || !amount || (frequency !== 'daily' && !day) || isSubmitting}
-        className={`w-full py-3 rounded-lg flex items-center justify-center space-x-2 
-          ${!frequency || !amount || (frequency !== 'daily' && !day) || isSubmitting
-            ? 'bg-gray-600 text-gray-400 cursor-not-allowed' 
-            : 'bg-yellow-600 hover:bg-yellow-700 text-white'}`}
-      >
-        {isSubmitting ? (
-          <>
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-            <span>Scheduling...</span>
-          </>
-        ) : (
-          <>
-            <PlusIcon size={18} />
-            <span>Add Recurring Schedule</span>
-          </>
-        )}
-      </button>
-    </div>
+
+      {/* Payment Confirmation Dialog */}
+      {employee && (
+        <PaymentConfirmationDialog
+          isOpen={showConfirmation}
+          onClose={() => setShowConfirmation(false)}
+          onConfirm={handleConfirmedSubmit}
+          employee={{
+            employeeId: employee.employeeId,
+            name: employee.name || 'Unknown Employee',
+            email: employee.email || '',
+            walletAddress: employee.walletAddress || '',
+            asset: employee.asset || 'USDC',
+            network: employee.network || 'Base',
+            position: employee.position
+          }}
+          paymentDetails={{
+            amount: parseFloat(amount) || 0,
+            asset: asset,
+            network: employee.network || 'Base',
+            scheduleType: 'recurring',
+            frequency: frequency,
+            nextExecution: getNextExecutionTime()
+          }}
+          isSubmitting={isSubmitting}
+        />
+      )}
+    </>
   )
 }
