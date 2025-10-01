@@ -226,16 +226,22 @@ const handleUpdateEmployee = async () => {
     );
 
     if (response.data.success) {
-      toast.success('Employee updated successfully!');
+      toast.success('Employee updated successfully!', {
+        closeOnClick: true,
+      });
       setShowEditEmployeeDialog(false);
       // Refresh employee list
       fetchEmployees();
     } else {
-      toast.error(response.data.message || 'Failed to update employee.');
+      toast.error(response.data.message || 'Failed to update employee.', {
+        closeOnClick: true,
+      });
     }
   } catch (error) {
     console.error('Error updating employee:', error);
-    toast.error(error.response?.data?.message || 'An error occurred while updating employee.');
+    toast.error(error.response?.data?.message || 'An error occurred while updating employee.', {
+      closeOnClick: true,
+    });
   }
 };
 
@@ -300,10 +306,12 @@ const handleUpdateEmployee = async () => {
     setLoading(true);
     
     const { data } = await axiosInstance.post('/employee/register', employeeData);
-    
-    if (data && data.data) {
-      await fetchEmployees();
+    // console.log('Registration response:', data);
+
+    if (data && data.success) {
       toast.success('Employee added successfully!');
+      setShowAddEmployee(false);
+      await fetchEmployees();
     } else {
       throw new Error('Invalid response structure from server');
     }

@@ -23,9 +23,9 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <ToastContainer 
+      {/* <Toaster />
+      <Sonner /> */}
+      {/* <ToastContainer 
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}
@@ -49,14 +49,23 @@ const App = () => (
         toastClassName="custom-toast"
         className="custom-toast-body"
         progressClassName="custom-toast-progress"
+      /> */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        closeOnClick
+        draggable
+        pauseOnHover
+        theme="dark"
       />
+
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/verify-email" element={<VerifyOTPPage />} />
-          <Route path="/login" element={<LoginPage />} /> 
-          <Route 
+          <Route path="/login" element={<LoginPage />} />
+          <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
@@ -64,37 +73,37 @@ const App = () => (
               </ProtectedRoute>
             }
           />
-          <Route 
-            path="/payroll" 
+          <Route
+            path="/payroll"
             element={
               <ProtectedRoute>
                 <Payroll />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/employees" 
+          <Route
+            path="/employees"
             element={
               <ProtectedRoute>
                 <Employees />
               </ProtectedRoute>
-              } 
+            }
           />
-          <Route 
-            path="/reports" 
+          <Route
+            path="/reports"
             element={
               <ProtectedRoute>
                 <Reports />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/settings" 
+          <Route
+            path="/settings"
             element={
               <ProtectedRoute>
                 <Settings />
               </ProtectedRoute>
-            } 
+            }
           />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
