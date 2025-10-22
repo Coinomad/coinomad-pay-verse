@@ -247,9 +247,7 @@ const handleUpdateEmployee = async () => {
 
   const networks = [
     { id: 'BASE', name: 'BASE', assets: ['USDT', 'USDC'] },
-    { id: 'ETHEREUM', name: 'ETHEREUM', assets: ['USDT', 'USDC'] },
     { id: 'POLYGON', name: 'POLYGON', assets: ['USDT', 'USDC'] },
-    { id: 'CELO', name: 'CELO', assets: ['CUSD'] }
   ];
 
   const selectedNetwork = networks.find(n => n.id === editFormData.network);

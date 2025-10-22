@@ -31,7 +31,6 @@ export const AddEmployeeDialog = ({ isOpen, onClose, onAddEmployee }: AddEmploye
 
   const networks = [
     { id: 'BASE', name: 'Base', assets: ['USDT', 'USDC'] },
-    { id: 'ETHEREUM', name: 'Ethereum', assets: ['USDT', 'USDC'] },
     { id: 'POLYGON', name: 'Polygon', assets: ['USDT', 'USDC'] },
   ];
 
