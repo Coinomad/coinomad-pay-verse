@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 const chartData = [
   { month: 'Jan', crypto: 2800, fiat: 2800000 },
@@ -42,18 +42,17 @@ export const PayrollChart = ({ selectedPeriod, onPeriodChange }: PayrollChartPro
         <CardTitle className="text-lg font-semibold text-white">
           Monthly Payroll Volume
         </CardTitle>
-        <div className="flex space-x-1 bg-[#0D0D0D] rounded-lg p-1">
+        <div className="flex space-x-1 bg-[#0D0D0D] border border-stone-300/25 rounded-[15px] py-2 px-9">
           {periods.map((period) => (
             <Button
               key={period}
               variant={selectedPeriod === period ? 'default' : 'ghost'}
               size="sm"
               onClick={() => onPeriodChange(period)}
-              className={`text-xs ${
-                selectedPeriod === period
+              className={`text-xs h-[29px] rounded-[10px] ${selectedPeriod === period
                   ? 'bg-[#ECE147] text-black hover:bg-[#ECE147]/90'
                   : 'text-[#B3B3B3] hover:text-white hover:bg-[#2C2C2C]'
-              }`}
+                }`}
             >
               {period}
             </Button>
@@ -61,31 +60,42 @@ export const PayrollChart = ({ selectedPeriod, onPeriodChange }: PayrollChartPro
         </div>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[300px]">
+        <ChartContainer config={chartConfig} className="w-full h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="cryptoGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ECE147" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#ECE147" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#ECE147" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#ECE147" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis 
-                dataKey="month" 
-                axisLine={false}
+
+              {/* Grid lines */}
+              <CartesianGrid stroke="#444" strokeDasharray="4 4" />
+
+              {/* X Axis */}
+              <XAxis
+                dataKey="month"
+                axisLine={{ stroke: '#FFFFFF', strokeWidth: 1 }}
                 tickLine={false}
-                tick={{ fill: '#B3B3B3', fontSize: 12 }}
+                tick={{ fill: '#FFFFFF', fontSize: 12, style: { fill: '#FFFFFF' } }}
+                tickMargin={20}
               />
-              <YAxis 
-                axisLine={false}
+
+              {/* Y Axis */}
+              <YAxis
+                axisLine={{ stroke: '#FFFFFF', strokeWidth: 1 }}
                 tickLine={false}
-                tick={{ fill: '#B3B3B3', fontSize: 12 }}
-                tickFormatter={(value) => `₿${(value/1000).toFixed(1)}k`}
+                tick={{ fill: '#FFFFFF', fontSize: 12, style: { fill: '#FFFFFF' } }}
+                tickMargin={20}
+                tickFormatter={(value) => `₿${(value / 1000).toFixed(1)}k`}
               />
-              <ChartTooltip 
+
+              <ChartTooltip
                 content={<ChartTooltipContent />}
                 cursor={{ stroke: '#ECE147', strokeWidth: 1 }}
               />
+
               <Area
                 type="monotone"
                 dataKey="crypto"

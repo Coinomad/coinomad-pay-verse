@@ -350,7 +350,7 @@ const handleUpdateEmployee = async () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-white">
+    <div className="min-h-screen bg-[#0D0D0D] text-white  px-9 pt-8">
       <Navigation />
       <main className="px-6 py-8 max-w-7xl mx-auto">
         {loading ? (
