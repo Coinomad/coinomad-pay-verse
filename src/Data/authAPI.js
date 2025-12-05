@@ -9,5 +9,5 @@ export const authAPI = {
 };
 
 export const userAPI = {
-    recentTransactions: () => axiosInstance.get('/employers/transactions'),
+  recentTransactions: () => axiosInstance.get('/employers/transactions'),
 }

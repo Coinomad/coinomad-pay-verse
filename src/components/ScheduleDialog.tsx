@@ -47,7 +47,7 @@ export const SchedulingModal: React.FC<SchedulingModalProps> = ({
   const handleAddSchedule = (schedule: Omit<Schedule, 'id'>) => {
     const newSchedule = {
       ...schedule,
-      id: Math.random().toString(36).substr(2, 9),
+      id: Math.random().toString(36).slice(2, 11),
     }
     setSchedules([...schedules, newSchedule as Schedule])
   }

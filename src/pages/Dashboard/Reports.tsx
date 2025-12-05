@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardDescription, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Download, FileText, TrendingUp, Users, DollarSign, Calendar } from 'luc
 import { EmployeeIcon, ClockIcon, CoinIcon } from '@/components/icons';
 import { CryptoIcon } from '@/components/icons';
 import { DynamicBarChart } from '@/components/charts/BarChart';
+import { reportAPI } from '@/Data/reportAPI';
 
 const periods = ["Day", "Week", "Month", "All Time"] as const;
 type Period = (typeof periods)[number];
@@ -95,6 +96,39 @@ const COLORS = ['#ECE147', '#9AE66E', '#B3B3B3', '#2C2C2C'];
 
 const Reports = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("Month");
+  const [amountPaid, setAmountPaid] = useState<string>('USD 0.00');
+  const [amountPaidRaw, setAmountPaidRaw] = useState<number>(0);
+  const [activeEmployees, setActiveEmployees] = useState<number>(0);
+  const [transactions, setTransactions] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchReportStats = async () => {
+      try {
+        const res = await reportAPI.getReportStats();
+        const data = res?.data || {};
+        const paid = Number(data.amountPaid ?? 0);
+        setAmountPaidRaw(paid);
+        setAmountPaid(`USD ${paid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+        setActiveEmployees(Number(data.activeEmployees ?? 0));
+        setTransactions(Number(data.transaction ?? 0));
+      } catch (e) {
+        // keep defaults on error
+        setAmountPaid('USD 0.00');
+        setAmountPaidRaw(0);
+        setActiveEmployees(0);
+        setTransactions(0);
+      }
+    };
+    fetchReportStats();
+  }, []);
+
+  const avgPerTxn = useMemo(() => {
+    return transactions > 0 ? amountPaidRaw / transactions : 0;
+  }, [amountPaidRaw, transactions]);
+
+  const txnsPerEmployee = useMemo(() => {
+    return activeEmployees > 0 ? transactions / activeEmployees : 0;
+  }, [transactions, activeEmployees]);
 
   // Normalize data shape for Recharts (use `label` as x-axis key)
   const chartData = useMemo(() => {
@@ -169,10 +203,10 @@ const Reports = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">USD 0.00</div>
+                  <div className="text-2xl font-bold text-white">{amountPaid}</div>
                   <div className="text-sm text-[#9AE66E] flex items-center mt-1">
                     <TrendingUp className="w-4 h-4 mr-1" />
-                    +12.5% vs last period
+                    Avg per transaction: USD {avgPerTxn.toFixed(2)}
                   </div>
                 </CardContent>
               </Card>
@@ -185,10 +219,10 @@ const Reports = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">5</div>
+                  <div className="text-2xl font-bold text-white">{activeEmployees}</div>
                   <div className="text-sm text-[#9AE66E] flex items-center mt-1">
                     <TrendingUp className="w-4 h-4 mr-1" />
-                    +4 new hires
+                    Transactions per employee: {txnsPerEmployee.toFixed(1)}
                   </div>
                 </CardContent>
               </Card>
@@ -201,7 +235,7 @@ const Reports = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">0</div>
+                  <div className="text-2xl font-bold text-white">{transactions}</div>
                   <div className="text-sm text-[#B3B3B3] mt-1">This period</div>
                 </CardContent>
               </Card>
@@ -216,7 +250,7 @@ const Reports = () => {
                 <CardContent>
                   <div className="text-2xl font-bold text-white">0.00 min</div>
                   <div className="text-sm text-[#9AE66E] flex items-center mt-1">
-                    -15% faster
+                    Transactions this period: {transactions}
                   </div>
                 </CardContent>
               </Card>

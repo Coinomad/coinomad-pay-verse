@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search, Filter, Grid, List, Calendar, Download, Eye, Edit, MoreHorizontal } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
+import { payrollAPI } from '@/Data/payrollAPI';
 import {
   Table,
   TableBody,
@@ -16,52 +17,16 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-const employeeData = [
-  {
-    id: 1,
-    name: 'Sarah Chen',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b17c?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80',
-    position: 'Senior Developer',
-    cryptoSalary: '₿0.85',
-    fiatSalary: '$85,000',
-    paymentDate: '2024-04-01',
-    status: 'Paid',
-    wallet: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-  },
-  {
-    id: 2,
-    name: 'Marcus Rodriguez',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80',
-    position: 'Product Manager',
-    cryptoSalary: '₿1.20',
-    fiatSalary: '$120,000',
-    paymentDate: '2024-04-01',
-    status: 'Failed',
-    wallet: '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2'
-  },
-  {
-    id: 3,
-    name: 'Emily Johnson',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80',
-    position: 'UX Designer',
-    cryptoSalary: '₿0.70',
-    fiatSalary: '$70,000',
-    paymentDate: '2024-04-15',
-    status: 'Pending',
-    wallet: '1HLoD9E4SDFFPDiYfNYnkBLQ85Y51J3Zb1'
-  },
-  {
-    id: 4,
-    name: 'David Kim',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80',
-    position: 'DevOps Engineer',
-    cryptoSalary: '₿0.95',
-    fiatSalary: '$95,000',
-    paymentDate: '2024-04-01',
-    status: 'Paid',
-    wallet: '1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX'
-  }
-];
+type EmployeeItem = {
+  id: number | string;
+  name: string;
+  avatar?: string;
+  position?: string;
+  fiatSalary?: string;
+  paymentDate?: string;
+  status?: string;
+  wallet?: string;
+};
 
 export const EmployeeTable = () => {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
@@ -69,10 +34,53 @@ export const EmployeeTable = () => {
   const [selectedEmployees, setSelectedEmployees] = useState<number[]>([]);
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(5);
+  const [employees, setEmployees] = useState<EmployeeItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const normalizeEmployee = (item: any, index: number): EmployeeItem => {
+    const id = item?.id ?? item?.employeeId ?? item?.employee_id ?? item?._id ?? index + 1;
+    const name = item?.name ?? ([item?.firstName, item?.lastName].filter(Boolean).join(' ') || '—');
+    const wallet = item?.wallet ?? item?.walletAddress ?? item?.address ?? '—';
+    const position = item?.position ?? item?.department ?? item?.role ?? '—';
+    const status = item?.status ?? item?.paymentStatus ?? 'Pending';
+    const avatar = item?.avatarUrl ?? item?.avatar ?? undefined;
+    const fiatRaw = item?.fiatSalary ?? item?.salary ?? item?.pay ?? null;
+    const fiatSalary = typeof fiatRaw === 'number' ? `$${fiatRaw.toLocaleString()}` : (fiatRaw || undefined);
+    const dateRaw = item?.paymentDate ?? item?.lastPaymentDate ?? item?.createdAt ?? null;
+    const paymentDate = dateRaw ? new Date(dateRaw).toISOString().slice(0, 10) : undefined;
+    return { id, name, wallet, position, status, avatar, fiatSalary, paymentDate };
+  };
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await payrollAPI.getEmployeePayroll();
+        const payload = res?.data;
+        const list = Array.isArray(payload?.data)
+          ? payload.data
+          : Array.isArray(payload?.employees)
+            ? payload.employees
+            : Array.isArray(payload)
+              ? payload
+              : [];
+        const normalized = list.map((item: any, idx: number) => normalizeEmployee(item, idx));
+        setEmployees(normalized);
+      } catch (e) {
+        setError('Failed to load employee payroll');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedEmployees(employeeData.map(emp => emp.id));
+      setSelectedEmployees(employees.map(emp => Number(emp.id)));
     } else {
       setSelectedEmployees([]);
     }
@@ -86,9 +94,9 @@ export const EmployeeTable = () => {
     }
   };
 
-  const filteredEmployees = employeeData.filter(employee =>
+  const filteredEmployees = employees.filter(employee =>
     employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.position.toLowerCase().includes(searchTerm.toLowerCase())
+    (employee.position || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const total = filteredEmployees.length;
@@ -177,7 +185,17 @@ export const EmployeeTable = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {displayedEmployees.map((employee) => (
+            {loading && (
+              <TableRow className="border-[#2C2C2C] hover:bg-transparent">
+                <TableCell colSpan={6} className="text-center text-[#B3B3B3]">Loading employees…</TableCell>
+              </TableRow>
+            )}
+            {!loading && displayedEmployees.length === 0 && (
+              <TableRow className="border-[#2C2C2C] hover:bg-transparent">
+                <TableCell colSpan={6} className="text-center text-[#B3B3B3]">No employees found</TableCell>
+              </TableRow>
+            )}
+            {!loading && displayedEmployees.map((employee) => (
               <TableRow
                 key={employee.id}
                 className="border-[#2C2C2C] hover:bg-[#0D0D0D]/50"
@@ -196,24 +214,22 @@ export const EmployeeTable = () => {
                     </Avatar>
                     <div>
                       <p className="font-medium text-white">{employee.name}</p>
-                      <p className="text-xs text-[#B3B3B3] font-mono">{employee.wallet.slice(0, 12)}...</p>
+                      <p className="text-xs text-[#B3B3B3] font-mono">{(employee.wallet || '—').slice(0, 12)}{employee.wallet ? '...' : ''}</p>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="text-[#B3B3B3]">{employee.position}</TableCell>
+                <TableCell className="text-[#B3B3B3]">{employee.position || '—'}</TableCell>
                 <TableCell>
                   <div>
-                    {/* <p className="text-white font-medium">{employee.cryptoSalary}</p> */}
-                    <p className="text-xs text-[#B3B3B3]">{employee.fiatSalary}</p>
+                    <p className="text-xs text-[#B3B3B3]">{employee.fiatSalary || '—'}</p>
                   </div>
                 </TableCell>
-                <TableCell className="text-[#B3B3B3]">{employee.paymentDate}</TableCell>
+                <TableCell className="text-[#B3B3B3]">{employee.paymentDate || '—'}</TableCell>
                 <TableCell>
                   <Badge
                     variant="default"
                     className={
-                      `h-7 w-[73px] flex justify-center ${ 
-                      employee.status === 'White'
+                      `h-7 w-[73px] flex justify-center ${employee.status === 'White'
                         ? 'bg-white text-gray-900 border-0'
                         : employee.status === 'Paid'
                           ? 'bg-[#148210] text-white border-0'
