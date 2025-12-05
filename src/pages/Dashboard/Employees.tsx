@@ -350,7 +350,7 @@ const handleUpdateEmployee = async () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-white">
+    <div className="min-h-screen bg-[#0D0D0D] text-white  px-9 pt-8">
       <Navigation />
       <main className="px-6 py-8 max-w-7xl mx-auto">
         {loading ? (
@@ -437,7 +437,7 @@ const handleUpdateEmployee = async () => {
               <CardContent>
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-[#2C2C2C]">
+                    <TableRow className="border-[#2C2C2C] hover:bg-transparent">
                       <TableHead className="text-[#B3B3B3]">Employee</TableHead>
                       <TableHead className="text-[#B3B3B3]">Position</TableHead>
                       <TableHead className="text-[#B3B3B3]">Wallet & Network</TableHead>
@@ -447,7 +447,7 @@ const handleUpdateEmployee = async () => {
                   </TableHeader>
                   <TableBody>
                     {filteredEmployees.map((employee) => (
-                      <TableRow key={employee.employeeId} className="border-[#2C2C2C]">
+                      <TableRow key={employee.employeeId} className="border-[#2C2C2C] hover:bg-transparent">
                         <TableCell>
                           <div>
                             <div className="text-white font-medium">{employee.name}</div>
@@ -523,7 +523,7 @@ const handleUpdateEmployee = async () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => openScheduleDialog(employee)}
-                              className="text-[#ECE147] hover:text-[#ECE147]/80"
+                              className="text-[#ECE147] hover:text-[#ECE147]/80 hover:bg-white/30"
                             >
                               <Calendar className="w-4 h-4" />
                             </Button>
@@ -531,7 +531,7 @@ const handleUpdateEmployee = async () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEmployeeEditClick(employee)}
-                              className="text-blue-400 hover:text-blue-300"
+                              className="text-blue-400 hover:text-blue-300 hover:bg-white/30"
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -539,7 +539,7 @@ const handleUpdateEmployee = async () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEmployeeDeleteClick(employee)}
-                              className="text-red-400 hover:text-red-300"
+                              className="text-red-400 hover:text-red-300 hover:bg-white/30"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>

@@ -58,7 +58,14 @@ const Navbar = () => {
                 </a>
               </li>
             </ul>
-            
+
+           <Button 
+              onClick={() => navigate('/login')}
+              className="bg-coinomad-primary hover:bg-coinomad-primary text-black font-medium neon-glow-primary hover:scale-105 transition-transform duration-200"
+            >
+              Login
+            </Button>
+
             <Button 
               onClick={() => navigate('/signup')}
               className="bg-coinomad-primary hover:bg-coinomad-primary text-black font-medium neon-glow-primary hover:scale-105 transition-transform duration-200"

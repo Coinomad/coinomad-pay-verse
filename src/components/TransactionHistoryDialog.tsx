@@ -6,7 +6,7 @@ import { toast } from '@/hooks/use-toast';
 
 interface Transaction {
   transactionId: string;
-  type: 'incoming' | 'withdrawal';
+  type: 'incoming' | 'outgoing';
   asset: 'USDC' | 'USDT' | 'CUSD';
   network: string;
   amount: number;
