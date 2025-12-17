@@ -83,13 +83,22 @@ const Dashboard = () => {
     return total + (wallet.assets?.USDT?.balance || 0) + (wallet.assets?.USDC?.balance || 0);
   }, 0);
 
-  const copyAddress = (address: string) => {
-    navigator.clipboard.writeText(address);
+  const copyAddress = async (address: string) => {
+  try {
+    await navigator.clipboard.writeText(address);
     toast({
       title: "Address copied!",
       description: "Wallet address copied to clipboard",
     });
-  };
+  } catch (error) {
+    console.error("Failed to copy address:", error);
+    toast({
+      title: "Copy failed",
+      description: "Could not copy wallet address to clipboard",
+      variant: "destructive",
+    });
+  }
+};
 
   const showQR = (address: string) => {
     setQrAddress(address);
@@ -153,7 +162,7 @@ const Dashboard = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => copyAddress(wallet.address)}
+                            onClick={async () => await copyAddress(wallet.address)}
                             className="text-[#ECE147] hover:text-[#ECE147]/80"
                           >
                             <Copy className="w-4 h-4" />
@@ -170,12 +179,36 @@ const Dashboard = () => {
                       </div>
                       
                       <div className="space-y-3">
-                        {Object.entries(wallet.assets).map(([asset, data]) => (
+                        {/* ALGO Balance for Algorand wallet */}
+                        {key === 'algorand' && wallet.algoBalanceMicro !== undefined && (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-[#ECE147]/10 rounded-full flex items-center justify-center">
+                                <span className="flex items-center gap-1">
+                                  {/* Placeholder for ALGO icon - ensure you have an /algo.png in your public folder */}
+                                  <img src="/algo.png" alt="ALGO" className="w-10 inline-block" />
+                                </span>
+                              </div>
+                              <div>
+                                <div className="text-white font-semibold">ALGO</div>
+                                <div className="text-[#B3B3B3] text-sm">{wallet.name}</div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-white font-semibold">
+                                {(wallet.algoBalanceMicro / 1_000_000).toLocaleString('en-US', { minimumFractionDigits: 2 })} ALGO
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Other Assets (USDC, USDT, etc.) */}
+                        {Object.entries(wallet.assets || {}).map(([asset, data]) => (
                           <div key={asset} className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-[#ECE147]/10 rounded-full flex items-center justify-center">
                                   <span className="flex items-center gap-1">
-                                    {asset === 'USDC' && (
+                                    {(asset === 'USDC' || asset === 'ASA-undefined') && (
                                       <img src="/usdc.png" alt="USDC" className="w-10 inline-block" />
                                     )}
                                     {asset === 'USDT' && (
@@ -184,7 +217,7 @@ const Dashboard = () => {
                                   </span>
                                 </div>
                               <div>
-                                <div className="text-white font-semibold">{asset}</div>
+                                <div className="text-white font-semibold">{asset === 'ASA-undefined' ? 'USDC' : asset}</div>
                                 <div className="text-[#B3B3B3] text-sm">{wallet.name}</div>
                               </div>
                             </div>

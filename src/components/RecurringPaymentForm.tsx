@@ -245,7 +245,7 @@ export const RecurringPaymentForm: React.FC<RecurringPaymentFormProps> = ({
         employeeId: employee.employeeId,
         amount: parseFloat(amount),
         asset: asset.toLowerCase(),
-        network: (employee.network || 'base').toLowerCase(),
+        network: (employee.network || 'base').toUpperCase(),
         scheduleType: 'recurring',
         frequency,
         hour: parseInt(selectedHour),
