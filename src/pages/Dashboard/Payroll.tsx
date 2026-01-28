@@ -23,7 +23,7 @@ const Payroll = () => {
         </div>
 
         {/* Top Section - Stats and Chart */}
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-4 lg:flex-row">
           <QuickActionCard
             title="Quick action"
             description="Perform common payroll tasks efficiently."

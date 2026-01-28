@@ -109,9 +109,9 @@ const Dashboard = () => {
         {/* Total Balance Card */}
         <Card className="bg-[#1A1A1A] border-[#2C2C2C] mb-8">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Wallet className="w-5 h-5 text-[#ECE147]" />
-              Total Portfolio Balance
+            <CardTitle className="text-white flex items-center justify-between w-full sm:justify-start sm:gap-2">
+              <span className="order-1">Total Portfolio Balance</span>
+              <Wallet className="w-5 h-5 text-[#ECE147] order-2 sm:order-none" />
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -144,10 +144,10 @@ const Dashboard = () => {
                 {Object.entries(wallets).map(([key, wallet]) => (
                   <TabsContent key={key} value={key} className="mt-6">
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 bg-[#2C2C2C] rounded-lg">
+                      <div className="flex flex-col gap-2 p-3 bg-[#2C2C2C] rounded-lg sm:flex-row sm:items-center sm:justify-between">
                         <span className="text-[#B3B3B3] text-sm">Wallet Address</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-white font-mono text-sm">
+                        <div className="flex items-center gap-2 sm:gap-3 sm:ml-4">
+                          <span className="text-white font-mono text-sm max-w-[150px] truncate sm:max-w-[220px]">
                             {wallet.address.slice(0, 8)}...{wallet.address.slice(-8)}
                           </span>
                           <Button
@@ -215,9 +215,9 @@ const Dashboard = () => {
 
           {/* Recent Transactions */}
           <Card className="bg-[#1A1A1A] border-[#2C2C2C]">
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <CardTitle className="text-white">Recent Transactions</CardTitle>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -225,7 +225,7 @@ const Dashboard = () => {
                   onClick={() => setShowTransactionHistory(true)}
                 >
                   <History className="w-4 h-4" />
-                  <span className="ml-1">Full History</span>
+                  <span className="ml-1 hidden sm:inline">Full History</span>
                 </Button>
                 <Button variant="ghost" size="sm" className="text-[#ECE147] hover:text-[#ECE147]/80">
                   <RefreshCw className="w-4 h-4" />

@@ -156,9 +156,9 @@ const Reports = () => {
         </div>
 
         {/* Report Controls */}
-        <div className="flex flex-wrap items-center gap-4 mb-8">
+        <div className="flex flex-col gap-4 mb-8 sm:flex-row sm:items-center">
           <Select defaultValue="3months">
-            <SelectTrigger className="w-48 bg-[#1A1A1A] border-[#2C2C2C] text-white rounded-[12px]">
+            <SelectTrigger className="w-full sm:w-48 bg-[#1A1A1A] border-[#2C2C2C] text-white rounded-[12px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-[#1A1A1A] border-[#2C2C2C] rounded-[12px]">
@@ -169,24 +169,24 @@ const Reports = () => {
             </SelectContent>
           </Select>
 
-          <Button className="bg-[#ECE147] text-black hover:bg-[#ECE147]/90 rounded-[12px]">
+          <Button className="bg-[#ECE147] text-black hover:bg-[#ECE147]/90 rounded-[12px] w-full sm:w-auto">
             <Download className="w-4 h-4 mr-2" />
             Export Report
           </Button>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="bg-[#1A1A1A] border-[#2C2C2C] py-7 px-[10px] rounded-[10px]">
-            <TabsTrigger value="overview" className="text-white data-[state=active]:bg-[#ECE147] data-[state=active]:text-black rounded-[10px]">
+          <TabsList className="bg-[#1A1A1A] border-[#2C2C2C] py-3 px-[10px] rounded-[10px] w-full flex-nowrap items-center justify-start gap-2 overflow-x-auto">
+            <TabsTrigger value="overview" className="text-white data-[state=active]:bg-[#ECE147] data-[state=active]:text-black rounded-[10px] whitespace-nowrap shrink-0">
               Overview
             </TabsTrigger>
-            <TabsTrigger value="payroll" className="text-white data-[state=active]:bg-[#ECE147] data-[state=active]:text-black rounded-[10px]">
+            <TabsTrigger value="payroll" className="text-white data-[state=active]:bg-[#ECE147] data-[state=active]:text-black rounded-[10px] whitespace-nowrap shrink-0">
               Payroll Analysis
             </TabsTrigger>
-            <TabsTrigger value="assets" className="text-white data-[state=active]:bg-[#ECE147] data-[state=active]:text-black rounded-[10px]">
+            <TabsTrigger value="assets" className="text-white data-[state=active]:bg-[#ECE147] data-[state=active]:text-black rounded-[10px] whitespace-nowrap shrink-0">
               Asset Distribution
             </TabsTrigger>
-            <TabsTrigger value="networks" className="text-white data-[state=active]:bg-[#ECE147] data-[state=active]:text-black rounded-[10px]">
+            <TabsTrigger value="networks" className="text-white data-[state=active]:bg-[#ECE147] data-[state=active]:text-black rounded-[10px] whitespace-nowrap shrink-0">
               Network Performance
             </TabsTrigger>
           </TabsList>
@@ -258,9 +258,9 @@ const Reports = () => {
 
             {/* Payroll Trends */}
             <Card className="bg-[#1A1A1A] border-[#2C2C2C]">
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-white">Payroll Trends</CardTitle>
-                <div className="flex items-center space-x-1 bg-[#0D0D0D] border border-stone-300/25 rounded-[15px] py-2 px-3">
+                <div className="flex flex-nowrap gap-1 bg-[#0D0D0D] border border-stone-300/25 rounded-[15px] py-2 px-3 w-full sm:w-auto overflow-x-auto">
                   {periods.map((period) => (
                     <Button
                       key={period}
@@ -277,9 +277,13 @@ const Reports = () => {
                   ))}
                 </div>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={chartData}>
+              <CardContent className="pb-4 sm:pb-6">
+                <div className="h-[220px] sm:h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={chartData}
+                      margin={{ left: -12, right: 8, top: 8, bottom: 0 }}
+                    >
                     <defs>
                       <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
                         {/* Top bright yellow but with opacity like Tailwind */}
@@ -302,6 +306,13 @@ const Reports = () => {
                       axisLine={{ stroke: "#FFFFFF", strokeWidth: 1 }}
                       tick={{ fill: "#FFFFFF", fontSize: 12 }}
                       tickLine={false}
+                      tickFormatter={(v) =>
+                        v >= 1_000_000
+                          ? `${(v / 1_000_000).toFixed(1)}M`
+                          : v >= 1000
+                            ? `${(v / 1000).toFixed(0)}k`
+                            : `${v}`
+                      }
                     />
 
                     <Area
@@ -313,11 +324,12 @@ const Reports = () => {
                       dot={{ fill: "#ECE147", r: 4 }}
                       activeDot={{ r: 6, stroke: "#0D0D0D", strokeWidth: 2 }}
                     />
-                  </AreaChart>
-                </ResponsiveContainer>
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
-            <div className='relative w-[610px] h-[522px] bg-stone-900 rounded-[20px]'>
+            <div className="relative w-full bg-stone-900 rounded-[20px] p-4 sm:p-6">
               <CardHeader>
                 <CardTitle className="text-white">Employee Distribution by Location</CardTitle>
                 <CardDescription className="text-white">Current employee count by office location</CardDescription>
@@ -328,10 +340,10 @@ const Reports = () => {
                 labelKey="location"
                 title="Employees by Location"
                 color="#F7EE24"
-                width={610}
-                height={350}
+                heightClassName="h-[170px] sm:h-[320px]"
                 showGrid={true}
                 showYAxis={true}
+                className="w-full"
               />
               <p className="flex items-center justify-center">Employees</p>
             </div>
@@ -339,10 +351,10 @@ const Reports = () => {
 
           <TabsContent value="payroll" className="space-y-6">
             <Card className="bg-[#1A1A1A] border-[#2C2C2C]">
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-white">Payroll Volume</CardTitle>
 
-                <div className="flex items-center space-x-1 bg-[#0D0D0D] border border-stone-300/25 rounded-[15px] py-2 px-3">
+                <div className="flex flex-nowrap gap-1 bg-[#0D0D0D] border border-stone-300/25 rounded-[15px] py-2 px-3 w-full sm:w-auto overflow-x-auto">
                   {periods.map((period) => (
                     <Button
                       key={period}
@@ -359,18 +371,20 @@ const Reports = () => {
                   ))}
                 </div>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#2C2C2C" />
-                    <XAxis dataKey="month" axisLine={{ stroke: '#FFFFFF', strokeWidth: 1 }} tick={{ fill: '#FFFFFF', fontSize: 12, style: { fill: '#FFFFFF' } }} />
-                    <YAxis axisLine={{ stroke: '#FFFFFF', strokeWidth: 1 }} tick={{ fill: '#FFFFFF', fontSize: 12, style: { fill: '#FFFFFF' } }} tickFormatter={(v) =>
-                      // format big numbers smartly
-                      v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M` : v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v
-                    } />
-                    <Bar dataKey="amount" fill="#ECE147" />
-                  </BarChart>
-                </ResponsiveContainer>
+              <CardContent className="pb-4 sm:pb-6">
+                <div className="h-[220px] sm:h-[360px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: -12 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#2C2C2C" />
+                      <XAxis dataKey="month" axisLine={{ stroke: '#FFFFFF', strokeWidth: 1 }} tick={{ fill: '#FFFFFF', fontSize: 12, style: { fill: '#FFFFFF' } }} />
+                      <YAxis axisLine={{ stroke: '#FFFFFF', strokeWidth: 1 }} tick={{ fill: '#FFFFFF', fontSize: 12, style: { fill: '#FFFFFF' } }} tickFormatter={(v) =>
+                        // format big numbers smartly
+                        v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M` : v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v
+                      } />
+                      <Bar dataKey="amount" fill="#ECE147" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -382,23 +396,25 @@ const Reports = () => {
                   <CardTitle className="text-white">Asset Distribution</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={assetDistribution}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={120}
-                        paddingAngle={5}
-                        dataKey="value"
-                      >
-                        {assetDistribution.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
+                  <div className="h-[240px] sm:h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={assetDistribution}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={120}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {assetDistribution.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -435,7 +451,7 @@ const Reports = () => {
               <CardContent>
                 <div className="space-y-4">
                   {networkData.map((network) => (
-                    <div key={network.network} className="flex items-center justify-between p-4 bg-[#0D0D0D] rounded-lg border border-[#2C2C2C]">
+                    <div key={network.network} className="flex flex-col gap-3 p-4 bg-[#0D0D0D] rounded-lg border border-[#2C2C2C] sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-center space-x-3">
                         {/* Crypto icon by symbol */}
                         <CryptoIcon symbol={network.symbol as any} size={28} color="#ECE147" className="shrink-0" />
@@ -444,7 +460,7 @@ const Reports = () => {
                           <div className="text-[#B3B3B3] text-sm">{network.transactions} transactions</div>
                         </div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-left sm:text-right">
                         <div className="text-white font-semibold">${network.volume.toLocaleString()}</div>
                         <div className="text-[#B3B3B3] text-sm">Volume</div>
                       </div>

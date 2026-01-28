@@ -110,7 +110,7 @@ export const EmployeeTable = () => {
   return (
     <Card className="bg-[#1A1A1A] border-[#2C2C2C]">
       <CardHeader>
-        <div className="flex flex-col sm:flex-row justify-between items-end gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-end">
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-white">Employee Payments</h2>
             <p className="text-white">Manage and review current payroll details for all employees.</p>
@@ -126,10 +126,10 @@ export const EmployeeTable = () => {
           </div>
 
           {/* Toolbar */}
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 w-full sm:w-auto">
 
 
-            <button className="flex items-center w-21 h-[37px] px-3 rounded-[9px] bg-[#0D0D0D] border border-[#2C2C2C] text-[#B3B3B3] hover:text-white">
+            <button className="flex items-center w-full sm:w-auto h-[37px] px-3 rounded-[9px] bg-[#0D0D0D] border border-[#2C2C2C] text-[#B3B3B3] hover:text-white">
               <Filter className="w-4 h-4 mr-2" />
               Filter
             </button>
@@ -158,7 +158,7 @@ export const EmployeeTable = () => {
               01 Apr 2025 – 30 Apr 2025
             </Button> */}
 
-            <button className="flex items-center w-21 h-[37px] px-3 rounded-[9px] bg-[#0D0D0D] border border-[#2C2C2C] text-[#B3B3B3] hover:text-white">
+            <button className="flex items-center w-full sm:w-auto h-[37px] px-3 rounded-[9px] bg-[#0D0D0D] border border-[#2C2C2C] text-[#B3B3B3] hover:text-white">
               <Download className="w-4 h-4 mr-2" />
               Export
             </button>
@@ -166,8 +166,9 @@ export const EmployeeTable = () => {
         </div>
       </CardHeader>
 
-      <CardContent className='bg-[#262626] rounded-[20px] mx-8 mb-8'>
-        <Table>
+      <CardContent className="bg-[#262626] rounded-[20px] mx-4 sm:mx-8 mb-8 overflow-x-auto">
+        <div className="min-w-[720px]">
+          <Table>
           <TableHeader>
             <TableRow className="border-[#2C2C2C] hover:bg-transparent">
               {/* <TableHead className="w-12">
@@ -260,9 +261,10 @@ export const EmployeeTable = () => {
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+          </Table>
+        </div>
         {/* Footer: showing range and pagination controls */}
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex flex-col gap-3 mt-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-[#B3B3B3]">
             {total === 0 ? (
               <span>Showing 0 of 0 employees</span>
@@ -271,7 +273,7 @@ export const EmployeeTable = () => {
             )}
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-between sm:justify-start space-x-2">
             <Button
               variant="ghost"
               size="sm"

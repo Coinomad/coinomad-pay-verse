@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
-import { Bell, ChevronDown, Search, LogOut, User, Settings } from 'lucide-react';
+import { Bell, ChevronDown, Search, LogOut, User, Settings, Menu } from 'lucide-react';
 import { UserIcon } from "./icons";
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -126,9 +126,9 @@ export const Navigation = () => {
               onClick={() => setIsOpen(!isOpen)}
               className="flex items-center space-x-2 focus:outline-none"
             >
-              <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-gray-200">
-                <UserIcon />
-              </div>
+              {/* <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-gray-200">
+                <Menu className="w-4 h-4" />
+              </div> */}
               <ChevronDown
                 className={`w-5 h-5 text-white transition-transform duration-200 ${isOpen ? "rotate-180" : "rotate-0"
                   }`}
@@ -137,7 +137,37 @@ export const Navigation = () => {
 
             {/* Dropdown */}
             {isOpen && (
-              <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
+                <div className="md:hidden">
+                  {menuItems.map((item) => {
+                    if (item.clickable) {
+                      return (
+                        <Link
+                          key={item.name}
+                          to={item.path}
+                          className={`flex items-center px-4 py-2 text-sm transition-colors ${
+                            location.pathname === item.path
+                              ? 'text-[#ECE147]'
+                              : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          }`}
+                          onClick={() => setIsOpen(false)}
+                        >
+                          {item.name}
+                        </Link>
+                      );
+                    }
+                    return (
+                      <div
+                        key={item.name}
+                        className="flex items-center px-4 py-2 text-sm text-gray-400 cursor-not-allowed opacity-60"
+                      >
+                        {item.name}
+                        <span className="ml-2 text-xs text-gray-400">(Soon)</span>
+                      </div>
+                    );
+                  })}
+                  <div className="my-2 h-px bg-gray-200 dark:bg-gray-700" />
+                </div>
                 <button
                   className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >

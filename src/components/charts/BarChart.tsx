@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import {
     ChartContainer,
     ChartTooltip,
@@ -17,6 +17,8 @@ interface BarChartProps {
     color?: string
     width?: number
     height?: number
+    className?: string
+    heightClassName?: string
     showGrid?: boolean
     showYAxis?: boolean
 }
@@ -27,8 +29,10 @@ export const DynamicBarChart: React.FC<BarChartProps> = ({
     labelKey = "label",
     title = "Bar Chart",
     color = "#CE4DED",
-    width = 600,
+    width,
     height = 300,
+    className,
+    heightClassName,
     showGrid = true,
     showYAxis = true,
 }) => {
@@ -39,48 +43,51 @@ export const DynamicBarChart: React.FC<BarChartProps> = ({
         },
     }
 
+    const containerStyle: React.CSSProperties = {
+        height: heightClassName ? undefined : `${height}px`,
+        width: width ? `${width}px` : "100%",
+    }
+
     return (
-        <div className="pr-4" style={{ width: `${width}px`, height: `${height}px` }}>
+        <div className={`w-full ${heightClassName ?? ""} ${className ?? ""}`} style={containerStyle}>
             <ChartContainer config={chartConfig}>
-                <BarChart
-                    data={data}
-                    width={width}
-                    height={height}
-                >
-                    {showGrid && (
-                        <CartesianGrid stroke="rgba(255,255,255,0.12)" vertical={false} />
-                    )}
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -12 }}>
+                        {showGrid && (
+                            <CartesianGrid stroke="rgba(255,255,255,0.12)" vertical={false} />
+                        )}
 
-                    <XAxis
-                        dataKey={labelKey}
-                        axisLine={{ stroke: '#FFFFFF', strokeWidth: 1 }}
-                        tick={{ fill: '#FFFFFF', fontSize: 12, style: { fill: '#FFFFFF' } }}
-                        tickLine={false}
-                        tickMargin={8}
-                        stroke="#FFFFFF"
-
-                    />
-
-                    {showYAxis && (
-                        <YAxis
+                        <XAxis
+                            dataKey={labelKey}
                             axisLine={{ stroke: '#FFFFFF', strokeWidth: 1 }}
                             tick={{ fill: '#FFFFFF', fontSize: 12, style: { fill: '#FFFFFF' } }}
                             tickLine={false}
+                            tickMargin={6}
                             stroke="#FFFFFF"
-                            tickMargin={8}
+
                         />
-                    )}
 
-                    <ChartTooltip
-                        content={<ChartTooltipContent />}
-                    />
+                        {showYAxis && (
+                            <YAxis
+                                axisLine={{ stroke: '#FFFFFF', strokeWidth: 1 }}
+                                tick={{ fill: '#FFFFFF', fontSize: 12, style: { fill: '#FFFFFF' } }}
+                                tickLine={false}
+                                stroke="#FFFFFF"
+                                tickMargin={6}
+                            />
+                        )}
 
-                    <Bar
-                        dataKey={dataKey}
-                        fill={color}
-                        radius={[6, 6, 0, 0]}
-                    />
-                </BarChart>
+                        <ChartTooltip
+                            content={<ChartTooltipContent />}
+                        />
+
+                        <Bar
+                            dataKey={dataKey}
+                            fill={color}
+                            radius={[6, 6, 0, 0]}
+                        />
+                    </BarChart>
+                </ResponsiveContainer>
             </ChartContainer>
         </div>
     )

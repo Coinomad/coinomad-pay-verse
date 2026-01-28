@@ -114,11 +114,11 @@ export const PayrollChart = ({ selectedPeriod, onPeriodChange }: PayrollChartPro
 
   return (
     <Card className="bg-[#1A1A1A] border-[#2C2C2C]">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle className="text-lg font-semibold text-white">
           Monthly Payroll Volume
         </CardTitle>
-        <div className="flex space-x-1 bg-[#0D0D0D] border border-stone-300/25 rounded-[15px] py-2 px-9">
+        <div className="flex flex-wrap justify-between gap-1 bg-[#0D0D0D] border border-stone-300/25 rounded-[15px] py-2 px-3 sm:px-9 w-full sm:w-auto">
           {periods.map((period) => (
             <Button
               key={period}
@@ -152,7 +152,7 @@ export const PayrollChart = ({ selectedPeriod, onPeriodChange }: PayrollChartPro
           </div>
         )}
         {!error && !loading && chartData.length > 0 && (
-          <ChartContainer config={chartConfig} className="w-full h-[300px]">
+          <ChartContainer config={chartConfig} className="w-full h-[240px] sm:h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
                 <defs>

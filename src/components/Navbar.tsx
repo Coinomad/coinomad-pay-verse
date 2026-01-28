@@ -30,7 +30,7 @@ const Navbar = () => {
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       isScrolled ? 'bg-coinomad-background bg-opacity-90 backdrop-blur-md border-b border-coinomad-border' : 'bg-transparent'
     }`}>
-      <div className="container mx-auto px-6 py-4">
+      <div className="container mx-auto lg:px-6 py-4">
         <div className="flex justify-between items-center">
           <Logo />
           

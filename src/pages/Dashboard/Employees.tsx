@@ -364,14 +364,14 @@ const handleUpdateEmployee = async () => {
           </div>
         ) : (
           <>
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col gap-4 mb-8 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-white mb-2">Employees</h1>
                 <p className="text-[#B3B3B3]">Manage your team and payment schedules</p>
               </div>
               <Button 
                 onClick={() => setShowAddEmployee(true)}
-                className="bg-[#ECE147] text-black hover:bg-[#ECE147]/90"
+                className="bg-[#ECE147] text-black hover:bg-[#ECE147]/90 w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Employee
