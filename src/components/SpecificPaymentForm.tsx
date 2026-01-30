@@ -297,14 +297,14 @@ export const SpecificPaymentForm: React.FC<SpecificPaymentFormProps> = ({
         name: employee.name,
         email: employee.email,
         walletAddress: employee.walletAddress,
-        asset: employee.asset || asset,
-        network: employee.network || 'BASE',
+        asset: asset,
+        network: employee?.network || 'BASE',
         position: employee.position
       },
       paymentDetails: {
         amount: parseFloat(amount),
         asset: asset.toLowerCase(),
-        network: (employee.network || 'base').toLowerCase(),
+        network: employee?.network?.toUpperCase() || 'BASE',
         scheduleType: 'specific',
         scheduledDateTime: scheduledUTC.toISOString()
       }
@@ -335,6 +335,7 @@ export const SpecificPaymentForm: React.FC<SpecificPaymentFormProps> = ({
       console.log('=== PAYMENT CONFIRMATION ===')
       console.log('Payload:', payload)
       console.log('============================')
+      console.log("Networkkk" + pendingPaymentData.paymentDetails.network)
       
       // Call the backend API
       const response = await axiosInstance.post('/wallet/schedule-transaction/', payload)

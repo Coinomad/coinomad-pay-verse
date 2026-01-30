@@ -32,6 +32,7 @@ export const AddEmployeeDialog = ({ isOpen, onClose, onAddEmployee }: AddEmploye
   const networks = [
     { id: 'BASE', name: 'Base', assets: ['USDT', 'USDC'] },
     { id: 'POLYGON', name: 'Polygon', assets: ['USDT', 'USDC'] },
+    { id: 'ALGORAND', name: 'Algorand', assets: ['USDC'] },
   ];
 
   const selectedNetwork = networks.find(n => n.id === formData.network);
