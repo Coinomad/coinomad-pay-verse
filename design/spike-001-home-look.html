@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coinomad — Stablecoin Settlement &amp; Infrastructure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F8F8F8;
+  --bg-soft:#F0FDF4;
+  --surface:#FFFFFF;
+  --ink:#0f2318;
+  --ink-soft:#28443F;
+  --ink-deep:#0A1710;
+  --accent:#FACC15;
+  --accent-bright:#FFE600;
+  --green:#16A34A;
+  --teal:#2F524C;
+  --muted:#6B7A72;
+  --border:#E3E8E4;
+  --s1:0 10px 40px rgba(15,35,24,.05);
+  --s2:0 24px 80px rgba(15,35,24,.08);
+  --s3:0 31px 80px rgba(15,35,24,.14);
+  --r-card:24px;
+  --r-xl:40px;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  color:var(--ink);
+  background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+.display{font-family:'Space Grotesk',sans-serif}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* ============ NAV (transparent → shrink-to-pill) ============ */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 40px;transition:padding .25s var(--ease)}
+.nav-inner{
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+  max-width:1280px;margin:0 auto;
+  padding:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;border:1px solid transparent;
+  transition:max-width .35s var(--ease),padding .25s var(--ease),background .25s var(--ease),box-shadow .3s var(--ease),border-color .25s var(--ease),margin-top .25s var(--ease);
+  color:#fff;
+}
+.nav.scrolled{padding:12px 20px}
+.nav.scrolled .nav-inner{
+  max-width:740px;
+  margin-top:0;
+  padding:9px 12px 9px 22px;
+  border-radius:999px;
+  background:rgba(255,255,255,.92);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  box-shadow:var(--s2);
+  border-color:rgba(227,232,228,.9);
+  color:var(--ink);
+}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:19px;letter-spacing:-.4px;white-space:nowrap}
+.logo .mark{display:inline-flex;transition:transform .3s var(--ease)}
+.nav.scrolled .logo .mark{transform:rotate(0deg)}
+.logo .mark svg{display:block}
+.links{display:flex;align-items:center;gap:26px}
+.links a{text-decoration:none;font-size:14.5px;font-weight:500;color:inherit;opacity:.82;transition:opacity .2s}
+.links a:hover{opacity:1}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:999px;font-weight:600;font-size:14.5px;text-decoration:none;cursor:pointer;border:none;transition:transform .15s var(--ease),background .2s,box-shadow .2s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--accent);color:var(--ink)}
+.btn-primary:hover{background:var(--accent-bright)}
+.btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25)}
+.nav.scrolled .btn-ghost{color:var(--ink);border-color:var(--border)}
+.nav-toggle{display:none;background:none;border:none;color:inherit;cursor:pointer}
+
+/* ============ HERO ============ */
+.hero{
+  position:relative;
+  background:linear-gradient(160deg,#123020 0%,var(--ink-deep) 100%);
+  color:#fff;
+  padding:170px 40px 40px;
+  overflow:hidden;
+}
+.hero::before{ /* dot grid */
+  content:"";position:absolute;inset:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.05) 1px,transparent 0);
+  background-size:34px 34px;
+  mask-image:linear-gradient(180deg,rgba(0,0,0,.9),rgba(0,0,0,.25));
+}
+.hero::after{ /* soft green depth tint (fill, not glow) */
+  content:"";position:absolute;right:-15%;top:-20%;width:60%;height:80%;
+  background:radial-gradient(ellipse at center,rgba(22,163,74,.20),transparent 65%);
+  pointer-events:none;
+}
+.hero-inner{position:relative;max-width:1280px;margin:0 auto;z-index:2}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  font-size:12.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:22px;
+}
+.eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+h1.hero-h{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:500;font-size:clamp(38px,6vw,68px);
+  line-height:.98;letter-spacing:-.03em;max-width:16ch;
+}
+h1.hero-h .accent{color:var(--accent)}
+.word{display:inline-block;opacity:0;transform:translateY(20px);animation:rise .6s var(--ease) forwards;animation-delay:calc(var(--i)*42ms)}
+@keyframes rise{to{opacity:1;transform:translateY(0)}}
+.hero-sub{max-width:52ch;margin-top:22px;font-size:17.5px;line-height:1.65;color:rgba(255,255,255,.82)}
+.hero-cta{display:flex;gap:14px;margin-top:34px;flex-wrap:wrap}
+.hero-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.chip{
+  font-size:12.5px;font-weight:500;color:rgba(255,255,255,.85);
+  border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:7px 14px;
+  display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.03);
+}
+.chip b{color:var(--accent);font-weight:600}
+
+/* rails */
+.rails{margin:46px -20px -40px;position:relative}
+.rails svg{width:100%;height:auto;display:block}
+.rail-base{stroke:rgba(143,196,168,.28);stroke-width:1.3;fill:none}
+.rail-flow{stroke:var(--green);stroke-width:1.6;fill:none;stroke-dasharray:2 11;stroke-linecap:round;animation:flow 2.6s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-130}}
+.rail-dot{fill:var(--accent)}
+.node-rect{fill:rgba(255,255,255,.06);stroke:rgba(255,255,255,.16)}
+.node-text{fill:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:500;letter-spacing:.02em}
+.node-sub{fill:rgba(255,255,255,.5);font-family:'Inter',sans-serif;font-size:10px}
+.coin{animation:coinFloat 5s ease-in-out infinite}
+.coin-inner{fill:#EAB308}
+.coin-ring{fill:none;stroke:rgba(255,255,255,.4);stroke-width:1.4}
+.coin-text{fill:var(--ink);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:34px}
+@keyframes coinFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+/* floating product cards */
+.float-cards{display:flex;gap:16px;margin-top:-46px;position:relative;z-index:3;flex-wrap:wrap}
+.fcard{
+  background:rgba(255,255,255,.98);color:var(--ink);
+  border-radius:16px;box-shadow:var(--s3);padding:14px 16px;
+  display:flex;align-items:center;gap:12px;min-width:210px;
+  animation:floaty 6s ease-in-out infinite;
+}
+.fcard:nth-child(2){animation-delay:-2s}
+.fcard:nth-child(3){animation-delay:-4s}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.fcard .ic{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;flex-shrink:0}
+.fcard .ic svg{width:20px;height:20px}
+.fcard .lbl{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.02em}
+.fcard .val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;letter-spacing:-.02em}
+.fcard .tag{font-size:11px;font-weight:600;margin-left:auto;padding:3px 9px;border-radius:999px}
+.ic-yellow{background:rgba(250,204,21,.18)}
+.ic-green{background:rgba(22,163,74,.14)}
+.ic-teal{background:rgba(47,82,76,.12)}
+.tag-green{color:var(--green);background:rgba(22,163,74,.12)}
+.tag-yellow{color:#B58A00;background:rgba(250,204,21,.2)}
+
+/* ============ TRUST ============ */
+.trust{max-width:1280px;margin:0 auto;padding:56px 40px 8px}
+.trust-bar{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);
+  box-shadow:var(--s1);display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden;
+}
+.tstat{padding:26px 28px;border-left:1px solid var(--border)}
+.tstat:first-child{border-left:none}
+.tstat .num{font-family:'Space Grotesk',sans-serif;font-size:34px;font-weight:600;letter-spacing:-.02em;line-height:1}
+.tstat .num small{font-size:17px;color:var(--green)}
+.tstat .lbl{font-size:13.5px;color:var(--muted);margin-top:8px;font-weight:500}
+.tstat .lbl .flag{margin-right:4px}
+
+/* ============ PILLARS ============ */
+.pillars{max-width:1280px;margin:0 auto;padding:72px 40px 96px}
+.section-head{max-width:640px;margin-bottom:44px}
+.section-head .kicker{font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:14px}
+.section-head h2{font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:clamp(30px,4.4vw,46px);letter-spacing:-.02em;line-height:1.04}
+.pillar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.pcard{
+  border-radius:var(--r-card);padding:30px;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;min-height:300px;
+  box-shadow:var(--s1);transition:transform .25s var(--ease),box-shadow .25s var(--ease);
+}
+.pcard:hover{transform:translateY(-5px);box-shadow:var(--s2)}
+.pcard .pic{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;margin-bottom:20px}
+.pcard .pic svg{width:22px;height:22px}
+.pcard h3{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:23px;letter-spacing:-.01em;margin-bottom:10px}
+.pcard p{font-size:15px;line-height:1.6;color:var(--muted)}
+.pcard .more{margin-top:auto;padding-top:22px;font-weight:600;font-size:14.5px;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:7px}
+.pcard .more svg{transition:transform .2s var(--ease)}
+.pcard .more:hover svg{transform:translateX(4px)}
+.p-light{background:var(--bg-soft);border:1px solid #D9EEDF}
+.p-teal{background:linear-gradient(160deg,#EAF4F0,#DEEBE5);border:1px solid #CFE2DA}
+.p-dark{background:linear-gradient(160deg,#123020,var(--ink-deep));border:1px solid #1C3B2C;color:#fff}
+.p-dark p{color:rgba(255,255,255,.72)}
+.p-dark .more{color:var(--accent)}
+.p-dark .pic{background:rgba(250,204,21,.15)}
+.code{
+  margin-top:18px;background:rgba(0,0,0,.35);border-radius:14px;padding:16px 18px;
+  font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;color:#c9e8d5;
+  border:1px solid rgba(255,255,255,.08);overflow-x:auto;white-space:pre;
+}
+.code .c1{color:#7ee2a8}.code .c2{color:#facc15}.code .c3{color:#7fb8e0}
+.pic-yellow{background:rgba(250,204,21,.2)}.pic-yellow svg{color:#B58A00}
+.pic-green{background:rgba(22,163,74,.14)}.pic-green svg{color:var(--green)}
+.pic-teal{background:rgba(47,82,76,.12)}.pic-teal svg{color:var(--teal)}
+
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.reveal.in{opacity:1;transform:translateY(0)}
+
+.note{max-width:1280px;margin:0 auto;padding:0 40px 56px;font-size:12.5px;color:var(--muted)}
+.note code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:#EDF1EE;padding:2px 6px;border-radius:6px}
+
+@media(max-width:900px){
+  .links{display:none}
+  .nav-toggle{display:block}
+  .pillar-grid{grid-template-columns:1fr}
+  .trust-bar{grid-template-columns:repeat(2,1fr)}
+  .tstat{border-left:none;border-top:1px solid var(--border)}
+  .tstat:nth-child(-n+2){border-top:none}
+  .hero{padding:150px 24px 24px}
+  .float-cards{margin-top:-24px}
+}
+@media(max-width:600px){
+  .nav{padding:16px 18px}
+  .nav.scrolled{padding:10px 14px}
+  .float-cards{flex-direction:column;align-items:stretch}
+  .fcard{min-width:0}
+  .trust-bar{grid-template-columns:1fr 1fr}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+  .word{opacity:1;transform:none}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="logo" href="#">
+      <span class="mark"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="15" fill="#FACC15"/><circle cx="15" cy="15" r="11" fill="none" stroke="#0f2318" stroke-width="2"/><path d="M15 8.5c3.6 0 6.5 2.9 6.5 6.5s-2.9 6.5-6.5 6.5S8.5 18.6 8.5 15 11.4 8.5 15 8.5Z" fill="#0f2318"/><path d="M15 11v8M12.2 13.4h5.6M12.2 16.6h5.6" stroke="#FACC15" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+      <span class="wordmark">coinomad</span>
+    </a>
+    <div class="links">
+      <a href="#">Collect</a>
+      <a href="#">Settle</a>
+      <a href="#">Build</a>
+      <a href="#">Blog</a>
+      <a href="#">Company</a>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <a href="#" class="btn btn-ghost">Log in</a>
+      <a href="#" class="btn btn-primary">Book a demo</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="hero-inner">
+    <span class="eyebrow"><span class="dot"></span>Stablecoin Settlement &amp; Infrastructure</span>
+    <h1 class="hero-h">
+      <span class="word" style="--i:0">Move</span>
+      <span class="word" style="--i:1">money</span>
+      <span class="word" style="--i:2">across</span>
+      <span class="word" style="--i:3">borders.</span><br>
+      <span class="word accent" style="--i:4">Settle</span>
+      <span class="word" style="--i:5">in</span>
+      <span class="word" style="--i:6">seconds.</span>
+    </h1>
+    <p class="hero-sub">Accept stablecoin payments, settle to seven fiat markets, and build on a developer-first API — one platform, rails everywhere.</p>
+    <div class="hero-cta">
+      <a href="#" class="btn btn-primary">Book a demo</a>
+      <a href="#" class="btn btn-ghost">Read the docs</a>
+    </div>
+    <div class="hero-chips">
+      <span class="chip"><b>7</b> markets · both directions</span>
+      <span class="chip"><b>13+</b> networks</span>
+      <span class="chip">CBN Sandbox <b>Cohort 2</b></span>
+      <span class="chip"><b>24</b> API endpoints</span>
+    </div>
+
+    <!-- rails illustration -->
+    <div class="rails">
+      <svg viewBox="0 0 1200 460" role="img" aria-label="Stablecoin moving across seven fiat rails: NGN, USD, EUR, GBP, CAD, MXN, BRL">
+        <defs>
+          <path id="r1" d="M170 235 C 360 200, 520 120, 720 92"/>
+          <path id="r2" d="M170 235 C 400 210, 620 140, 870 128"/>
+          <path id="r3" d="M170 235 C 440 225, 700 185, 1000 178"/>
+          <path id="r4" d="M170 235 C 460 240, 760 245, 1080 245"/>
+          <path id="r5" d="M170 235 C 440 245, 700 305, 1000 312"/>
+          <path id="r6" d="M170 235 C 400 260, 620 350, 870 362"/>
+          <path id="r7" d="M170 235 C 360 270, 520 370, 720 398"/>
+        </defs>
+
+        <!-- base rails -->
+        <g class="rail-base">
+          <use href="#r1"/><use href="#r2"/><use href="#r3"/><use href="#r4"/><use href="#r5"/><use href="#r6"/><use href="#r7"/>
+        </g>
+        <!-- flow rails -->
+        <g class="rail-flow">
+          <use href="#r1" style="animation-delay:0s"/><use href="#r2" style="animation-delay:-.4s"/>
+          <use href="#r3" style="animation-delay:-.8s"/><use href="#r4" style="animation-delay:-1.2s"/>
+          <use href="#r5" style="animation-delay:-1.6s"/><use href="#r6" style="animation-delay:-2s"/>
+          <use href="#r7" style="animation-delay:-2.4s"/>
+        </g>
+        <!-- traveling coins -->
+        <g class="rail-dot">
+          <circle r="4.5"><animateMotion dur="3s" repeatCount="indefinite" href="#r1"/></circle>
+          <circle r="4.5"><animateMotion dur="3.2s" repeatCount="indefinite" begin="-1.4s" href="#r2"/></circle>
+          <circle r="4.5"><animateMotion dur="3.4s" repeatCount="indefinite" begin="-2.1s" href="#r3"/></circle>
+          <circle r="4.5"><animateMotion dur="3.1s" repeatCount="indefinite" begin="-0.7s" href="#r4"/></circle>
+          <circle r="4.5"><animateMotion dur="3.5s" repeatCount="indefinite" begin="-1.9s" href="#r5"/></circle>
+          <circle r="4.5"><animateMotion dur="3.3s" repeatCount="indefinite" begin="-1.1s" href="#r6"/></circle>
+          <circle r="4.5"><animateMotion dur="3.6s" repeatCount="indefinite" begin="-2.6s" href="#r7"/></circle>
+        </g>
+
+        <!-- hub coin -->
+        <g class="coin">
+          <circle cx="170" cy="235" r="42" fill="#FACC15"/>
+          <circle class="coin-inner" cx="170" cy="235" r="34" fill="#EAB308"/>
+          <circle class="coin-ring" cx="170" cy="235" r="38"/>
+          <text class="coin-text" x="170" y="249" text-anchor="middle">$</text>
+        </g>
+
+        <!-- market nodes -->
+        <g font-family="Space Grotesk, sans-serif">
+          <g transform="translate(720,92)"><rect class="node-rect" x="-52" y="-20" width="104" height="40" rx="20"/><circle cx="-30" cy="0" r="3.4" fill="#FACC15"/><text class="node-text" x="-18" y="5">NGN</text></g>
+          <g transform="translate(870,128)"><rect class="node-rect" x="-52" y="-20" width="104" height="40" rx="20"/><circle cx="-30" cy="0" r="3.4" fill="#7ee2a8"/><text class="node-text" x="-18" y="5">USD</text></g>
+          <g transform="translate(1000,178)"><rect class="node-rect" x="-52" y="-20" width="104" height="40" rx="20"/><circle cx="-30" cy="0" r="3.4" fill="#7fb8e0"/><text class="node-text" x="-18" y="5">EUR</text></g>
+          <g transform="translate(1080,245)"><rect class="node-rect" x="-52" y="-20" width="104" height="40" rx="20"/><circle cx="-30" cy="0" r="3.4" fill="#f5d26b"/><text class="node-text" x="-18" y="5">GBP</text></g>
+          <g transform="translate(1000,312)"><rect class="node-rect" x="-52" y="-20" width="104" height="40" rx="20"/><circle cx="-30" cy="0" r="3.4" fill="#ff9d76"/><text class="node-text" x="-18" y="5">CAD</text></g>
+          <g transform="translate(870,362)"><rect class="node-rect" x="-52" y="-20" width="104" height="40" rx="20"/><circle cx="-30" cy="0" r="3.4" fill="#b89ae8"/><text class="node-text" x="-18" y="5">MXN</text></g>
+          <g transform="translate(720,398)"><rect class="node-rect" x="-52" y="-20" width="104" height="40" rx="20"/><circle cx="-30" cy="0" r="3.4" fill="#7ee2a8"/><text class="node-text" x="-18" y="5">BRL</text></g>
+        </g>
+      </svg>
+    </div>
+
+    <!-- floating product cards -->
+    <div class="float-cards">
+      <div class="fcard">
+        <span class="ic ic-yellow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></svg></span>
+        <div><div class="lbl">PAYMENT LINK</div><div class="val">pay.coinomad.xyz/inv-AF29C</div></div>
+        <span class="tag tag-green">Live</span>
+      </div>
+      <div class="fcard">
+        <span class="ic ic-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18"/></svg></span>
+        <div><div class="lbl">VIRTUAL ACCOUNT · USD</div><div class="val">$1,250.00 received</div></div>
+        <span class="tag tag-yellow">Settling</span>
+      </div>
+      <div class="fcard">
+        <span class="ic ic-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
+        <div><div class="lbl">API · POST /v2/customers</div><div class="val">201 Created</div></div>
+        <span class="tag tag-green">200ms</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ TRUST ============ -->
+<section class="trust">
+  <div class="trust-bar reveal">
+    <div class="tstat"><div class="num">7</div><div class="lbl">Markets, both directions</div></div>
+    <div class="tstat"><div class="num">13<small>+</small></div><div class="lbl">Blockchain networks</div></div>
+    <div class="tstat"><div class="num">24</div><div class="lbl">Enterprise API endpoints</div></div>
+    <div class="tstat"><div class="num">CBN</div><div class="lbl">Sandbox Cohort 2 · VASP</div></div>
+  </div>
+</section>
+
+<!-- ============ PILLARS ============ -->
+<section class="pillars">
+  <div class="section-head reveal">
+    <div class="kicker">One platform, three ways to move money</div>
+    <h2>Collect. Settle. Build.</h2>
+  </div>
+  <div class="pillar-grid">
+    <!-- Collect -->
+    <div class="pcard p-light reveal">
+      <div class="pic pic-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v5"/><circle cx="12" cy="15" r="4"/><path d="M3 12v5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5"/></svg></div>
+      <h3>Collect</h3>
+      <p>Accept stablecoin payments with a merchant wallet, payment links, or an embeddable widget. Issue virtual accounts and collect fiat that converts instantly.</p>
+      <a class="more" href="#">More about Collect <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+    </div>
+    <!-- Settle -->
+    <div class="pcard p-teal reveal">
+      <div class="pic pic-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg></div>
+      <h3>Settle</h3>
+      <p>Convert stablecoins to 30+ fiat currencies and deliver to bank accounts across seven markets — automatically, from a non-custodial desk.</p>
+      <a class="more" href="#">More about Settle <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+    </div>
+    <!-- Build -->
+    <div class="pcard p-dark reveal">
+      <div class="pic pic-yellow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+      <h3>Build</h3>
+      <p>Integrate a unified payments API. Create customers, issue accounts, and trigger automated payouts — programmatically.</p>
+      <div class="code"><span class="c1">POST</span> /v2/customers
+<span class="c2">{</span> <span class="c3">"email"</span>: <span class="c2">"ops@acme.io"</span> <span class="c2">}</span>
+→ <span class="c1">201</span> <span class="c2">{</span> <span class="c3">"id"</span>: <span class="c2">"cus_8f3k…"</span> <span class="c2">}</span></div>
+      <a class="more" href="#">More about Build <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<div class="note">Design spike 001 · hero + pill nav + rails + pillars. Copy is illustrative; facts (7 markets, 13+ networks, 24 endpoints, CBN Sandbox) are current.</div>
+
+<script>
+// Pill nav: transparent full-width → shrink-to-center capsule on scroll
+(function(){
+  var nav = document.getElementById('nav');
+  var ticking = false;
+  function update(){
+    if(window.scrollY > 80){ nav.classList.add('scrolled'); }
+    else{ nav.classList.remove('scrolled'); }
+    ticking = false;
+  }
+  window.addEventListener('scroll', function(){
+    if(!ticking){ window.requestAnimationFrame(update); ticking = true; }
+  }, {passive:true});
+  update();
+})();
+
+// Scroll reveals
+(function(){
+  var els = document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, {threshold:0.18});
+    els.forEach(function(el){ io.observe(el); });
+  } else {
+    els.forEach(function(el){ el.classList.add('in'); });
+  }
+})();
+</script>
+</body>
+</html>

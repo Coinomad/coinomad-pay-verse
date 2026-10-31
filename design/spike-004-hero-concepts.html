@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hero animation — three institutional concepts · Coinomad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0A08;--ink:#F4F1E8;--muted:rgba(238,232,214,.58);--faint:rgba(238,232,214,.36);
+  --yellow:#FACC15;--yellow-b:#FFE600;--green:#22C55E;--green-b:#4ADE80;--green-s:#86EFAC;
+  --line:rgba(255,255,255,.09);--line-y:rgba(250,204,21,.22);--line-g:rgba(74,222,128,.22);
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Instrument Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.6}
+.mono{font-family:'JetBrains Mono',monospace}
+.serif{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight:400}
+.wrap{max-width:1280px;margin:0 auto;padding:0 40px}
+.topbar{position:sticky;top:0;z-index:10;background:rgba(10,10,8,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:18px 0}
+.topbar .inner{max-width:1280px;margin:0 auto;padding:0 40px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.topbar a{color:var(--yellow);text-decoration:none;font-weight:600;font-size:14px}
+.topbar .t{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.pagehead{padding:72px 0 8px}
+.pagehead .kicker{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--green-b);margin-bottom:18px}
+.pagehead h1{font-size:clamp(34px,5vw,58px);letter-spacing:-.03em;line-height:1;font-weight:700;max-width:22ch}
+.pagehead h1 .serif{color:var(--yellow)}
+.pagehead p{color:var(--muted);max-width:64ch;margin-top:20px;font-size:16.5px}
+.concept{padding:64px 0 24px}
+.concept-head{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:start;border-bottom:1px solid var(--line);padding-bottom:22px}
+.concept-letter{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--yellow);border:1px solid var(--line-y);border-radius:14px;width:46px;height:46px;display:grid;place-items:center;font-weight:600}
+.concept-head h2{font-size:clamp(24px,3vw,34px);letter-spacing:-.02em;font-weight:700;line-height:1.1}
+.concept-head h2 .serif{color:var(--yellow)}
+.concept-head .desc{color:var(--muted);font-size:15px;margin-top:8px;max-width:60ch;line-height:1.6}
+.concept-head .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.concept-head .tags span{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 11px}
+.stage{margin-top:26px;border:1px solid var(--line);border-radius:26px;background:radial-gradient(120% 140% at 50% -10%,rgba(250,204,21,.06),transparent 55%),linear-gradient(180deg,#0C0C0A,#0A0A08);position:relative;overflow:hidden}
+.stage::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(244,241,232,.045) 1px,transparent 0);background-size:34px 34px;pointer-events:none}
+.stage svg{display:block;width:100%;height:auto;position:relative;z-index:2}
+.vl{fill:var(--ink);font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.06em}
+.vl-sm{fill:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em}
+.vnode{fill:rgba(255,255,255,.03);stroke:rgba(244,241,232,.18)}
+.vnode-y{fill:rgba(250,204,21,.06);stroke:rgba(250,204,21,.3)}
+.vnode-g{fill:rgba(34,197,94,.06);stroke:rgba(74,222,128,.3)}
+.vline{stroke:rgba(244,241,232,.12);stroke-width:1.2;fill:none}
+.flowg{stroke:var(--green);stroke-width:1.8;fill:none;stroke-dasharray:3 12;stroke-linecap:round;animation:flow 2.8s linear infinite}
+.flowy{stroke:var(--yellow);stroke-dasharray:2 9;animation-duration:2.2s}
+@keyframes flow{to{stroke-dashoffset:-150}}
+.rot{transform-origin:center;animation:rot 16s linear infinite}
+.rot-r{transform-origin:center;animation:rot 22s linear infinite reverse}
+@keyframes rot{to{transform:rotate(360deg)}}
+.dot-y{fill:var(--yellow-b)}.dot-g{fill:var(--green-b)}
+.pkt .fade{animation:none}
+/* packet envelope handled via SMIL <animate opacity>; wrapper hidden under reduced motion */
+.readout{position:relative;height:30px;margin-top:16px}
+.readout span{position:absolute;left:50%;top:0;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.08em;color:var(--green-b);opacity:0;animation:cyc 7.2s infinite;white-space:nowrap}
+.readout span b{color:var(--yellow);font-weight:600}
+@keyframes cyc{0%{opacity:0}6%{opacity:1}28%{opacity:1}36%{opacity:0}100%{opacity:0}}
+/* marquee */
+.tape{border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;margin-top:0}
+.tape-track{display:flex;width:max-content;animation:marq 28s linear infinite}
+.tape-track span{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;color:var(--muted);padding:14px 26px;white-space:nowrap}
+.tape-track span b{color:var(--green-b);font-weight:500}
+.tape-track span i{color:var(--yellow);font-style:normal}
+@keyframes marq{to{transform:translateX(-50%)}}
+.note{max-width:1280px;margin:0 auto;padding:40px 40px 70px;font-size:12.5px;color:var(--faint)}
+.note a{color:var(--yellow);text-decoration:none}
+@media(prefers-reduced-motion:reduce){
+  .flowg,.rot,.rot-r,.readout span,.tape-track{animation:none !important}
+  .pkt{display:none}
+}
+@media(max-width:800px){.wrap,.topbar .inner,.note{padding-left:20px;padding-right:20px}.concept-head{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="inner">
+  <span class="t">Hero animation · institutional concepts</span>
+  <a href="spike-003-home.html">← Back to spike-003 home</a>
+</div></div>
+
+<div class="pagehead wrap">
+  <div class="kicker">Any asset → any other asset</div>
+  <h1>Three ways to draw <span class="serif">the settlement core.</span></h1>
+  <p>Not "stablecoin to fiat" — but every currency and stablecoin flowing into a central infrastructure and back out as any other. EUR→NGN, NGN→CAD, BRL→USDC. Three institutional framings of the same idea; pick the one that matches the brand you're building.</p>
+</div>
+
+<!-- ============ CONCEPT A : CLEARING HUB ============ -->
+<section class="concept wrap">
+  <div class="concept-head">
+    <span class="concept-letter">A</span>
+    <div>
+      <h2>The <span class="serif">Clearing Hub</span></h2>
+      <p class="desc">A central settlement core with every asset ringed around it. Value enters the core from any side and exits as any other — a national clearinghouse in motion.</p>
+      <div class="tags"><span>ring topology</span><span>central counterparty</span><span>symmetric · institutional</span></div>
+    </div>
+  </div>
+  <div class="stage">
+    <svg viewBox="0 0 800 600" role="img" aria-label="Clearing hub: assets ringed around a central settlement core with conversion flows">
+      <!-- spokes -->
+      <g class="vline">
+        <line x1="400" y1="300" x2="400" y2="90"/>
+        <line x1="400" y1="300" x2="535" y2="139"/>
+        <line x1="400" y1="300" x2="607" y2="263"/>
+        <line x1="400" y1="300" x2="582" y2="405"/>
+        <line x1="400" y1="300" x2="472" y2="497"/>
+        <line x1="400" y1="300" x2="328" y2="497"/>
+        <line x1="400" y1="300" x2="218" y2="405"/>
+        <line x1="400" y1="300" x2="193" y2="263"/>
+        <line x1="400" y1="300" x2="265" y2="139"/>
+      </g>
+      <!-- orbit rings -->
+      <circle class="rot" cx="400" cy="300" r="210" fill="none" stroke="rgba(74,222,128,.18)" stroke-width="1.2" stroke-dasharray="3 10"/>
+      <circle class="rot-r" cx="400" cy="300" r="252" fill="none" stroke="rgba(250,204,21,.14)" stroke-width="1.1" stroke-dasharray="2 13"/>
+      <!-- asset nodes -->
+      <g>
+        <g transform="translate(400,90)"><rect class="vnode-y" x="-44" y="-16" width="88" height="32" rx="16"/><text class="vl" x="0" y="4.5" text-anchor="middle">NGN</text></g>
+        <g transform="translate(535,139)"><rect class="vnode" x="-44" y="-16" width="88" height="32" rx="16"/><text class="vl" x="0" y="4.5" text-anchor="middle">USD</text></g>
+        <g transform="translate(607,263)"><rect class="vnode" x="-44" y="-16" width="88" height="32" rx="16"/><text class="vl" x="0" y="4.5" text-anchor="middle">EUR</text></g>
+        <g transform="translate(582,405)"><rect class="vnode" x="-44" y="-16" width="88" height="32" rx="16"/><text class="vl" x="0" y="4.5" text-anchor="middle">GBP</text></g>
+        <g transform="translate(472,497)"><rect class="vnode" x="-44" y="-16" width="88" height="32" rx="16"/><text class="vl" x="0" y="4.5" text-anchor="middle">CAD</text></g>
+        <g transform="translate(328,497)"><rect class="vnode" x="-44" y="-16" width="88" height="32" rx="16"/><text class="vl" x="0" y="4.5" text-anchor="middle">MXN</text></g>
+        <g transform="translate(218,405)"><rect class="vnode" x="-44" y="-16" width="88" height="32" rx="16"/><text class="vl" x="0" y="4.5" text-anchor="middle">BRL</text></g>
+        <g transform="translate(193,263)"><rect class="vnode-g" x="-48" y="-16" width="96" height="32" rx="16"/><text class="vl" x="0" y="4.5" text-anchor="middle" fill="#86EFAC">USDC</text></g>
+        <g transform="translate(265,139)"><rect class="vnode-g" x="-48" y="-16" width="96" height="32" rx="16"/><text class="vl" x="0" y="4.5" text-anchor="middle" fill="#86EFAC">USDT</text></g>
+      </g>
+      <!-- central core -->
+      <g>
+        <circle cx="400" cy="300" r="58" fill="rgba(250,204,21,.08)"/>
+        <circle cx="400" cy="300" r="46" fill="#0A0A08" stroke="rgba(250,204,21,.5)" stroke-width="1.6"/>
+        <text class="vl" x="400" y="296" text-anchor="middle" style="font-size:11px">SETTLEMENT</text>
+        <text class="vl" x="400" y="312" text-anchor="middle" style="font-size:11px" fill="#FACC15">CORE</text>
+        <circle class="rot" cx="400" cy="300" r="64" fill="none" stroke="rgba(250,204,21,.4)" stroke-width="1.3" stroke-dasharray="4 9"/>
+      </g>
+      <!-- conversion packets: source -> core -> dest -->
+      <g class="pkt">
+        <circle class="dot-y" r="4.5"><animateMotion dur="3.2s" repeatCount="indefinite" path="M607 263 C 560 300, 470 300, 408 296"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.78;1" dur="3.2s" repeatCount="indefinite"/></circle>
+        <circle class="dot-g" r="4.5"><animateMotion dur="3.2s" repeatCount="indefinite" begin="-1.6s" path="M400 292 C 400 200, 400 140, 400 96"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.78;1" dur="3.2s" repeatCount="indefinite" begin="-1.6s"/></circle>
+        <circle class="dot-g" r="4.5"><animateMotion dur="3.4s" repeatCount="indefinite" begin="-0.8s" path="M400 96 C 400 160, 420 220, 410 292"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.78;1" dur="3.4s" repeatCount="indefinite" begin="-0.8s"/></circle>
+        <circle class="dot-y" r="4.5"><animateMotion dur="3.4s" repeatCount="indefinite" begin="-2.5s" path="M420 300 C 440 380, 455 450, 466 490"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.78;1" dur="3.4s" repeatCount="indefinite" begin="-2.5s"/></circle>
+        <circle class="dot-g" r="4.5"><animateMotion dur="3.6s" repeatCount="indefinite" begin="-1.2s" path="M224 398 C 260 360, 340 320, 392 302"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.78;1" dur="3.6s" repeatCount="indefinite" begin="-1.2s"/></circle>
+        <circle class="dot-y" r="4.5"><animateMotion dur="3.6s" repeatCount="indefinite" begin="-3s" path="M392 296 C 300 290, 240 280, 200 266"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.78;1" dur="3.6s" repeatCount="indefinite" begin="-3s"/></circle>
+      </g>
+    </svg>
+    <div class="readout">
+      <span style="animation-delay:0s">EUR <b>→</b> NGN · converted</span>
+      <span style="animation-delay:1.8s">NGN <b>→</b> CAD · converted</span>
+      <span style="animation-delay:3.6s">BRL <b>→</b> USDC · converted</span>
+      <span style="animation-delay:5.4s">USDT <b>→</b> GBP · converted</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONCEPT B : NATIONAL RAIL ============ -->
+<section class="concept wrap">
+  <div class="concept-head">
+    <span class="concept-letter">B</span>
+    <div>
+      <h2>The <span class="serif">National Rail</span></h2>
+      <p class="desc">A central settlement spine with every asset as a station. Value rides any branch, crosses the exchange at the core, and exits on any other branch — national infrastructure drawn like a rail network.</p>
+      <div class="tags"><span>backbone + branches</span><span>routing / topology</span><span>infrastructure map</span></div>
+    </div>
+  </div>
+  <div class="stage">
+    <svg viewBox="0 0 800 560" role="img" aria-label="National rail: assets as stations on a central settlement spine">
+      <!-- main spine (double line) -->
+      <rect x="60" y="274" width="680" height="12" rx="6" fill="rgba(250,204,21,.07)"/>
+      <line class="vline" x1="60" y1="280" x2="740" y2="280"/>
+      <g class="flowy" stroke-width="2"><line x1="60" y1="280" x2="740" y2="280"/></g>
+      <!-- branch lines -->
+      <g class="vline">
+        <line x1="120" y1="120" x2="120" y2="274"/>
+        <line x1="300" y1="120" x2="300" y2="274"/>
+        <line x1="480" y1="120" x2="480" y2="274"/>
+        <line x1="660" y1="120" x2="660" y2="274"/>
+        <line x1="120" y1="286" x2="120" y2="440"/>
+        <line x1="300" y1="286" x2="300" y2="440"/>
+        <line x1="480" y1="286" x2="480" y2="440"/>
+        <line x1="660" y1="286" x2="660" y2="440"/>
+      </g>
+      <!-- stations -->
+      <g>
+        <g transform="translate(120,100)"><rect class="vnode-y" x="-44" y="-15" width="88" height="30" rx="15"/><text class="vl" x="0" y="4.5" text-anchor="middle">NGN</text></g>
+        <g transform="translate(300,100)"><rect class="vnode" x="-44" y="-15" width="88" height="30" rx="15"/><text class="vl" x="0" y="4.5" text-anchor="middle">EUR</text></g>
+        <g transform="translate(480,100)"><rect class="vnode" x="-44" y="-15" width="88" height="30" rx="15"/><text class="vl" x="0" y="4.5" text-anchor="middle">GBP</text></g>
+        <g transform="translate(660,100)"><rect class="vnode" x="-44" y="-15" width="88" height="30" rx="15"/><text class="vl" x="0" y="4.5" text-anchor="middle">USD</text></g>
+        <g transform="translate(120,460)"><rect class="vnode" x="-44" y="-15" width="88" height="30" rx="15"/><text class="vl" x="0" y="4.5" text-anchor="middle">CAD</text></g>
+        <g transform="translate(300,460)"><rect class="vnode" x="-44" y="-15" width="88" height="30" rx="15"/><text class="vl" x="0" y="4.5" text-anchor="middle">BRL</text></g>
+        <g transform="translate(480,460)"><rect class="vnode" x="-44" y="-15" width="88" height="30" rx="15"/><text class="vl" x="0" y="4.5" text-anchor="middle">MXN</text></g>
+        <g transform="translate(660,460)"><rect class="vnode-g" x="-48" y="-15" width="96" height="30" rx="15"/><text class="vl" x="0" y="4.5" text-anchor="middle" fill="#86EFAC">USDC</text></g>
+      </g>
+      <!-- central exchange node -->
+      <g>
+        <rect x="372" y="238" width="56" height="84" rx="16" fill="#0A0A08" stroke="rgba(250,204,21,.55)" stroke-width="1.6"/>
+        <text class="vl" x="400" y="274" text-anchor="middle" style="font-size:10px" fill="#FACC15">EXCHANGE</text>
+        <text class="vl-sm" x="400" y="290" text-anchor="middle">7 mkts</text>
+        <circle class="rot" cx="400" cy="280" r="46" fill="none" stroke="rgba(74,222,128,.4)" stroke-width="1.3" stroke-dasharray="3 8"/>
+      </g>
+      <!-- routed packets -->
+      <g class="pkt">
+        <circle class="dot-g" r="4.5"><animateMotion dur="4s" repeatCount="indefinite" path="M300 100 L300 280 L400 280 L400 460 L120 460"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.06;.84;1" dur="4s" repeatCount="indefinite"/></circle>
+        <circle class="dot-y" r="4.5"><animateMotion dur="4.2s" repeatCount="indefinite" begin="-1.4s" path="M660 100 L660 280 L400 280 L400 460 L480 460"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.06;.84;1" dur="4.2s" repeatCount="indefinite" begin="-1.4s"/></circle>
+        <circle class="dot-g" r="4.5"><animateMotion dur="4.4s" repeatCount="indefinite" begin="-2.8s" path="M300 460 L300 280 L400 280 L480 100"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.06;.84;1" dur="4.4s" repeatCount="indefinite" begin="-2.8s"/></circle>
+      </g>
+      <!-- pair annotations -->
+      <g>
+        <text class="vl-sm" x="140" y="230" fill="#4ADE80">EUR → CAD</text>
+        <text class="vl-sm" x="520" y="230" fill="#FACC15">USD → MXN</text>
+        <text class="vl-sm" x="340" y="500" fill="#4ADE80">BRL → GBP</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- ============ CONCEPT C : EXCHANGE LEDGER ============ -->
+<section class="concept wrap">
+  <div class="concept-head">
+    <span class="concept-letter">C</span>
+    <div>
+      <h2>The <span class="serif">Exchange Ledger</span></h2>
+      <p class="desc">Source assets on the left, destinations on the right, a matching engine between them. Every row is a live pair — a running settlement ledger, or a ticket tape of global value.</p>
+      <div class="tags"><span>matched flows</span><span>double-entry</span><span>ticker tape</span></div>
+    </div>
+  </div>
+  <div class="stage">
+    <svg viewBox="0 0 800 500" role="img" aria-label="Exchange ledger: sources on the left, destinations on the right, matched through a central engine">
+      <!-- matching engine band -->
+      <rect x="340" y="60" width="120" height="380" rx="18" fill="rgba(250,204,21,.05)"/>
+      <rect x="352" y="216" width="96" height="68" rx="14" fill="#0A0A08" stroke="rgba(250,204,21,.5)" stroke-width="1.5"/>
+      <text class="vl" x="400" y="246" text-anchor="middle" style="font-size:10px" fill="#FACC15">MATCH</text>
+      <text class="vl-sm" x="400" y="262" text-anchor="middle">engine</text>
+      <circle class="rot" cx="400" cy="250" r="42" fill="none" stroke="rgba(74,222,128,.4)" stroke-width="1.3" stroke-dasharray="3 8"/>
+      <!-- rows -->
+      <g>
+        <!-- r1 EUR -> NGN -->
+        <g transform="translate(0,100)"><rect class="vnode" x="70" y="-15" width="88" height="30" rx="15"/><text class="vl" x="114" y="4.5" text-anchor="middle">EUR</text><rect class="vnode-y" x="642" y="-15" width="88" height="30" rx="15"/><text class="vl" x="686" y="4.5" text-anchor="middle">NGN</text><line class="vline" x1="158" y1="0" x2="340" y2="0"/><line class="vline" x1="460" y1="0" x2="642" y2="0"/><line class="flowg" x1="158" y1="0" x2="340" y2="0"/><line class="flowy" x1="460" y1="0" x2="642" y2="0"/></g>
+        <!-- r2 NGN -> CAD -->
+        <g transform="translate(0,210)"><rect class="vnode-y" x="70" y="-15" width="88" height="30" rx="15"/><text class="vl" x="114" y="4.5" text-anchor="middle">NGN</text><rect class="vnode" x="642" y="-15" width="88" height="30" rx="15"/><text class="vl" x="686" y="4.5" text-anchor="middle">CAD</text><line class="vline" x1="158" y1="0" x2="340" y2="0"/><line class="vline" x1="460" y1="0" x2="642" y2="0"/><line class="flowg" x1="158" y1="0" x2="340" y2="0"/><line class="flowy" x1="460" y1="0" x2="642" y2="0"/></g>
+        <!-- r3 BRL -> USDC -->
+        <g transform="translate(0,320)"><rect class="vnode" x="70" y="-15" width="88" height="30" rx="15"/><text class="vl" x="114" y="4.5" text-anchor="middle">BRL</text><rect class="vnode-g" x="638" y="-15" width="96" height="30" rx="15"/><text class="vl" x="686" y="4.5" text-anchor="middle" fill="#86EFAC">USDC</text><line class="vline" x1="158" y1="0" x2="340" y2="0"/><line class="vline" x1="460" y1="0" x2="638" y2="0"/><line class="flowg" x1="158" y1="0" x2="340" y2="0"/><line class="flowy" x1="460" y1="0" x2="638" y2="0"/></g>
+        <!-- r4 USDC -> GBP -->
+        <g transform="translate(0,430)"><rect class="vnode-g" x="66" y="-15" width="96" height="30" rx="15"/><text class="vl" x="114" y="4.5" text-anchor="middle" fill="#86EFAC">USDC</text><rect class="vnode" x="642" y="-15" width="88" height="30" rx="15"/><text class="vl" x="686" y="4.5" text-anchor="middle">GBP</text><line class="vline" x1="162" y1="0" x2="340" y2="0"/><line class="vline" x1="460" y1="0" x2="642" y2="0"/><line class="flowg" x1="162" y1="0" x2="340" y2="0"/><line class="flowy" x1="460" y1="0" x2="642" y2="0"/></g>
+      </g>
+      <!-- traveling packets -->
+      <g class="pkt">
+        <circle class="dot-g" r="4"><animateMotion dur="2.6s" repeatCount="indefinite" path="M158 100 L340 100 L400 100 L400 250 L400 320 L460 320 L638 320"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="2.6s" repeatCount="indefinite"/></circle>
+        <circle class="dot-y" r="4"><animateMotion dur="3s" repeatCount="indefinite" begin="-1.3s" path="M158 210 L340 210 L400 210 L400 250 L400 430 L460 430 L642 430"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3s" repeatCount="indefinite" begin="-1.3s"/></circle>
+      </g>
+    </svg>
+    <div class="tape"><div class="tape-track">
+      <span>EUR <b>→</b> NGN · 1,582.40</span><span>NGN <b>→</b> CAD · 0.00081</span><span>BRL <b>→</b> USDC · 0.1821</span><span>USDC <b>→</b> GBP · 0.7482</span><span>MXN <b>→</b> EUR · 0.0514</span><span>USD <b>→</b> NGN · 1,412.90</span><span>GBP <b>→</b> USDT · 1.2910</span><span>CAD <b>→</b> BRL · 4.0200</span>
+      <span>EUR <b>→</b> NGN · 1,582.40</span><span>NGN <b>→</b> CAD · 0.00081</span><span>BRL <b>→</b> USDC · 0.1821</span><span>USDC <b>→</b> GBP · 0.7482</span><span>MXN <b>→</b> EUR · 0.0514</span><span>USD <b>→</b> NGN · 1,412.90</span><span>GBP <b>→</b> USDT · 1.2910</span><span>CAD <b>→</b> BRL · 4.0200</span>
+    </div></div>
+  </div>
+</section>
+
+<div class="note">Three institutional framings of "any asset → any other asset" through a central settlement core. Concept A = clearinghouse ring · B = national rail topology · C = matched ledger/ticker. ISO codes used (no flags) for an institutional register — flags can be reintroduced as HTML chips on the chosen concept. <a href="spike-003-home.html">← Back to spike-003 home</a></div>
+
+</body>
+</html>

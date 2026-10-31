@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Logo from './Logo';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
@@ -7,6 +8,7 @@ import { Menu, X } from 'lucide-react';
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Handle scroll event
   useEffect(() => {
@@ -28,7 +30,7 @@ const Navbar = () => {
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       isScrolled ? 'bg-coinomad-background bg-opacity-90 backdrop-blur-md border-b border-coinomad-border' : 'bg-transparent'
     }`}>
-      <div className="container mx-auto px-6 py-4">
+      <div className="container mx-auto lg:px-6 py-4">
         <div className="flex justify-between items-center">
           <Logo />
           
@@ -56,17 +58,19 @@ const Navbar = () => {
                 </a>
               </li>
             </ul>
-            
-            <Button 
-              onClick={() => {
-                const element = document.getElementById('waitlist');
-                if (element) {
-                  element.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
+
+           <Button 
+              onClick={() => navigate('/login')}
               className="bg-coinomad-primary hover:bg-coinomad-primary text-black font-medium neon-glow-primary hover:scale-105 transition-transform duration-200"
             >
-              Waitlist
+              Login
+            </Button>
+
+            <Button 
+              onClick={() => navigate('/signup')}
+              className="bg-coinomad-primary hover:bg-coinomad-primary text-black font-medium neon-glow-primary hover:scale-105 transition-transform duration-200"
+            >
+              Sign Up
             </Button>
           </div>
           
@@ -128,13 +132,10 @@ const Navbar = () => {
                   className="bg-coinomad-primary hover:bg-coinomad-primary text-black font-medium w-full neon-glow-primary hover:scale-105 transition-transform duration-200"
                   onClick={() => {
                     setIsMenuOpen(false);
-                    const element = document.getElementById('waitlist');
-                    if (element) {
-                      element.scrollIntoView({ behavior: 'smooth' });
-                    }
+                    navigate('/signup');
                   }}
                 >
-                  Waitlist
+                  Sign Up
                 </Button>
               </li>
             </ul>

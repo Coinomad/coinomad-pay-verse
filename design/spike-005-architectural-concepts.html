@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hero animation — architectural concepts · Coinomad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0A08;--ink:#F4F1E8;--muted:rgba(238,232,214,.58);--faint:rgba(238,232,214,.36);
+  --yellow:#FACC15;--yellow-b:#FFE600;--green:#22C55E;--green-b:#4ADE80;--green-s:#86EFAC;
+  --line:rgba(255,255,255,.09);--line-y:rgba(250,204,21,.22);--line-g:rgba(74,222,128,.22);
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Instrument Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.6}
+.mono{font-family:'JetBrains Mono',monospace}
+.serif{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight:400}
+.wrap{max-width:1280px;margin:0 auto;padding:0 40px}
+.topbar{position:sticky;top:0;z-index:10;background:rgba(10,10,8,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:18px 0}
+.topbar .inner{max-width:1280px;margin:0 auto;padding:0 40px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.topbar a{color:var(--yellow);text-decoration:none;font-weight:600;font-size:14px}
+.topbar .t{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.pagehead{padding:72px 0 8px}
+.pagehead .kicker{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--green-b);margin-bottom:18px}
+.pagehead h1{font-size:clamp(34px,5vw,58px);letter-spacing:-.03em;line-height:1;font-weight:700;max-width:24ch}
+.pagehead h1 .serif{color:var(--yellow)}
+.pagehead p{color:var(--muted);max-width:66ch;margin-top:20px;font-size:16.5px}
+.concept{padding:64px 0 24px}
+.concept-head{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:start;border-bottom:1px solid var(--line);padding-bottom:22px}
+.concept-letter{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--yellow);border:1px solid var(--line-y);border-radius:14px;width:46px;height:46px;display:grid;place-items:center;font-weight:600}
+.concept-head h2{font-size:clamp(24px,3vw,34px);letter-spacing:-.02em;font-weight:700;line-height:1.1}
+.concept-head h2 .serif{color:var(--yellow)}
+.concept-head .desc{color:var(--muted);font-size:15px;margin-top:8px;max-width:60ch;line-height:1.6}
+.concept-head .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.concept-head .tags span{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 11px}
+.stage{margin-top:26px;border:1px solid var(--line);border-radius:26px;background:radial-gradient(120% 140% at 50% -10%,rgba(250,204,21,.06),transparent 55%),linear-gradient(180deg,#0C0C0A,#0A0A08);position:relative;overflow:hidden}
+.stage::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(244,241,232,.045) 1px,transparent 0);background-size:34px 34px;pointer-events:none}
+.stage svg{display:block;width:100%;height:auto;position:relative;z-index:2}
+.vl{fill:var(--ink);font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.06em}
+.vl-sm{fill:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em}
+.vdim{fill:var(--faint);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em}
+.vline{stroke:rgba(244,241,232,.13);stroke-width:1.2;fill:none}
+.vline-dim{stroke:rgba(244,241,232,.2);stroke-width:.8;fill:none}
+.vfill{fill:rgba(250,204,21,.05)}
+.vfill-g{fill:rgba(34,197,94,.05)}
+.flowg{stroke:var(--green);stroke-width:1.8;fill:none;stroke-dasharray:3 12;stroke-linecap:round;animation:flow 2.8s linear infinite}
+.flowy{stroke:var(--yellow);stroke-dasharray:2 9;animation-duration:2.2s}
+@keyframes flow{to{stroke-dashoffset:-150}}
+.rot{transform-origin:center;animation:rot 16s linear infinite}
+.rot-r{transform-origin:center;animation:rot 22s linear infinite reverse}
+@keyframes rot{to{transform:rotate(360deg)}}
+.dot-y{fill:var(--yellow-b)}.dot-g{fill:var(--green-b)}
+.note{max-width:1280px;margin:0 auto;padding:40px 40px 70px;font-size:12.5px;color:var(--faint)}
+.note a{color:var(--yellow);text-decoration:none}
+@media(prefers-reduced-motion:reduce){.flowg,.rot,.rot-r{animation:none !important}.pkt{display:none}}
+@media(max-width:800px){.wrap,.topbar .inner,.note{padding-left:20px;padding-right:20px}.concept-head{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="inner">
+  <span class="t">Hero animation · architectural concepts</span>
+  <a href="spike-004-hero-concepts.html">← Institutional concepts (A–C)</a>
+</div></div>
+
+<div class="pagehead wrap">
+  <div class="kicker">Financial architecture · any asset → any other</div>
+  <h1>The settlement core, drawn as <span class="serif">a building.</span></h1>
+  <p>Money enters a financial structure, is transformed through its levels and columns, and leaves as something else. Three architectural drawings of that idea — drafting-line precision, columns and vaults and rotundas.</p>
+</div>
+
+<!-- ============ CONCEPT D : THE SETTLEMENT HALL (facade) ============ -->
+<section class="concept wrap">
+  <div class="concept-head">
+    <span class="concept-letter">D</span>
+    <div>
+      <h2>The <span class="serif">Settlement Hall</span></h2>
+      <p class="desc">A neoclassical financial facade — seven columns, each a currency rail. Value rises up the columns, gathers in the entablature, and leaves through the clearing door.</p>
+      <div class="tags"><span>facade · order</span><span>columns as rails</span><span>drafting lines</span></div>
+    </div>
+  </div>
+  <div class="stage">
+    <svg viewBox="0 0 800 560" role="img" aria-label="Settlement hall facade with columns as currency rails">
+      <!-- dimension line (left) -->
+      <g class="vline-dim">
+        <line x1="48" y1="206" x2="48" y2="470"/>
+        <line x1="44" y1="206" x2="52" y2="206"/><line x1="44" y1="470" x2="52" y2="470"/>
+      </g>
+      <text class="vdim" x="30" y="210">EL. 14.5M</text>
+      <!-- ground + steps -->
+      <line class="vline" x1="70" y1="470" x2="730" y2="470"/>
+      <g class="vline"><rect x="120" y="470" width="560" height="13"/><rect x="140" y="483" width="520" height="13"/><rect x="160" y="496" width="480" height="13"/></g>
+      <!-- entablature -->
+      <rect x="88" y="206" width="624" height="34" class="vline"/>
+      <text class="vl" x="400" y="228" text-anchor="middle" style="font-size:13px;letter-spacing:.2em">SETTLEMENT HALL</text>
+      <!-- entablature flow (value gathers + converts) -->
+      <line class="flowg" x1="92" y1="223" x2="712" y2="223"/>
+      <!-- pediment -->
+      <polyline class="vline" points="400,118 88,206 712,206 400,118"/>
+      <polyline class="vline" points="400,132 112,206 688,206 400,132"/>
+      <!-- rose window -->
+      <circle cx="400" cy="172" r="25" class="vline"/>
+      <circle class="rot" cx="400" cy="172" r="19" fill="none" stroke="rgba(250,204,21,.4)" stroke-width="1.2" stroke-dasharray="3 7"/>
+      <line class="vline" x1="400" y1="147" x2="400" y2="197"/><line class="vline" x1="375" y1="172" x2="425" y2="172"/>
+      <!-- columns (7 rails) -->
+      <g>
+        <!-- column helper positions: 160,240,320,400,480,560,640 -->
+        <g transform="translate(160,0)"><rect class="vfill" x="-9" y="242" width="18" height="228"/><line class="vline" x1="-8" y1="242" x2="-8" y2="470"/><line class="vline" x1="8" y1="242" x2="8" y2="470"/><rect class="vline" x="-15" y="232" width="30" height="10"/><text class="vl" x="0" y="260" text-anchor="middle" style="font-size:8.5px" fill="#4ADE80">NGN</text></g>
+        <g transform="translate(240,0)"><rect class="vfill-g" x="-9" y="242" width="18" height="228"/><line class="vline" x1="-8" y1="242" x2="-8" y2="470"/><line class="vline" x1="8" y1="242" x2="8" y2="470"/><rect class="vline" x="-15" y="232" width="30" height="10"/><text class="vl" x="0" y="260" text-anchor="middle" style="font-size:8.5px">USD</text></g>
+        <g transform="translate(320,0)"><rect class="vfill" x="-9" y="242" width="18" height="228"/><line class="vline" x1="-8" y1="242" x2="-8" y2="470"/><line class="vline" x1="8" y1="242" x2="8" y2="470"/><rect class="vline" x="-15" y="232" width="30" height="10"/><text class="vl" x="0" y="260" text-anchor="middle" style="font-size:8.5px" fill="#4ADE80">EUR</text></g>
+        <g transform="translate(400,0)"><rect class="vfill-g" x="-9" y="242" width="18" height="228"/><line class="vline" x1="-8" y1="242" x2="-8" y2="470"/><line class="vline" x1="8" y1="242" x2="8" y2="470"/><rect class="vline" x="-15" y="232" width="30" height="10"/><text class="vl" x="0" y="260" text-anchor="middle" style="font-size:8.5px">GBP</text></g>
+        <g transform="translate(480,0)"><rect class="vfill" x="-9" y="242" width="18" height="228"/><line class="vline" x1="-8" y1="242" x2="-8" y2="470"/><line class="vline" x1="8" y1="242" x2="8" y2="470"/><rect class="vline" x="-15" y="232" width="30" height="10"/><text class="vl" x="0" y="260" text-anchor="middle" style="font-size:8.5px" fill="#4ADE80">CAD</text></g>
+        <g transform="translate(560,0)"><rect class="vfill-g" x="-9" y="242" width="18" height="228"/><line class="vline" x1="-8" y1="242" x2="-8" y2="470"/><line class="vline" x1="8" y1="242" x2="8" y2="470"/><rect class="vline" x="-15" y="232" width="30" height="10"/><text class="vl" x="0" y="260" text-anchor="middle" style="font-size:8.5px">MXN</text></g>
+        <g transform="translate(640,0)"><rect class="vfill" x="-9" y="242" width="18" height="228"/><line class="vline" x1="-8" y1="242" x2="-8" y2="470"/><line class="vline" x1="8" y1="242" x2="8" y2="470"/><rect class="vline" x="-15" y="232" width="30" height="10"/><text class="vl" x="0" y="260" text-anchor="middle" style="font-size:8.5px" fill="#4ADE80">BRL</text></g>
+      </g>
+      <!-- central clearing door -->
+      <rect class="vline" x="360" y="386" width="80" height="84"/>
+      <rect class="vline" x="368" y="394" width="64" height="76"/>
+      <text class="vl" x="400" y="382" text-anchor="middle" style="font-size:9px" fill="#FACC15">CLEARING</text>
+      <!-- flows -->
+      <g class="pkt">
+        <circle class="dot-g" r="4"><animateMotion dur="3s" repeatCount="indefinite" path="M240 464 L240 250"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3s" repeatCount="indefinite"/></circle>
+        <circle class="dot-g" r="4"><animateMotion dur="3s" repeatCount="indefinite" begin="-1.5s" path="M480 464 L480 250"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3s" repeatCount="indefinite" begin="-1.5s"/></circle>
+        <circle class="dot-y" r="4"><animateMotion dur="2.8s" repeatCount="indefinite" begin="-.7s" path="M400 250 L400 386"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="2.8s" repeatCount="indefinite" begin="-.7s"/></circle>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- ============ CONCEPT E : CLEARING HOUSE CUTAWAY (section) ============ -->
+<section class="concept wrap">
+  <div class="concept-head">
+    <span class="concept-letter">E</span>
+    <div>
+      <h2>The Clearing House, <span class="serif">cut open</span></h2>
+      <p class="desc">A cross-section of a financial building: deposits rise one riser, convert across the floors, settle in the vault below, and pay out down the far side.</p>
+      <div class="tags"><span>section / cutaway</span><span>vault · floors</span><span>technical elevation</span></div>
+    </div>
+  </div>
+  <div class="stage">
+    <svg viewBox="0 0 800 560" role="img" aria-label="Clearing house cross-section with vault, floors, and value risers">
+      <!-- level dimension line -->
+      <g class="vline-dim"><line x1="40" y1="150" x2="40" y2="540"/><line x1="36" y1="150" x2="44" y2="150"/><line x1="36" y1="540" x2="44" y2="540"/></g>
+      <!-- floor slabs -->
+      <g class="vline">
+        <line x1="120" y1="150" x2="700" y2="150"/>
+        <rect x="140" y="224" width="540" height="9"/><rect x="140" y="294" width="540" height="9"/><rect x="140" y="364" width="540" height="9"/>
+        <line x1="120" y1="430" x2="700" y2="430"/>
+      </g>
+      <!-- level labels -->
+      <g>
+        <text class="vl-sm" x="100" y="154" fill="#4ADE80">L3 · CONVERT</text>
+        <text class="vl-sm" x="100" y="228" fill="#4ADE80">L2 · CONVERT</text>
+        <text class="vl-sm" x="100" y="298" fill="#4ADE80">L1 · CONVERT</text>
+        <text class="vl-sm" x="100" y="368" fill="#FACC15">G · DEPOSITS</text>
+        <text class="vl-sm" x="100" y="520" fill="#FACC15">B1 · VAULT</text>
+      </g>
+      <!-- risers (pipes) -->
+      <g class="vline">
+        <line x1="180" y1="150" x2="180" y2="430"/><line x1="188" y1="150" x2="188" y2="430"/>
+        <line x1="612" y1="150" x2="612" y2="430"/><line x1="620" y1="150" x2="620" y2="430"/>
+      </g>
+      <text class="vl-sm" x="176" y="142" fill="#4ADE80">IN</text>
+      <text class="vl-sm" x="606" y="142" fill="#FACC15">OUT</text>
+      <!-- horizontal conversion flows per floor -->
+      <line class="flowg" x1="200" y1="255" x2="600" y2="255"/>
+      <line class="flowy" x1="200" y1="325" x2="600" y2="325"/>
+      <line class="flowg" x1="200" y1="395" x2="600" y2="395"/>
+      <!-- vault -->
+      <g>
+        <circle cx="400" cy="492" r="42" class="vline"/>
+        <circle cx="400" cy="492" r="30" fill="rgba(250,204,21,.06)"/>
+        <circle class="rot" cx="400" cy="492" r="52" fill="none" stroke="rgba(250,204,21,.4)" stroke-width="1.3" stroke-dasharray="4 9"/>
+        <line class="vline" x1="400" y1="460" x2="400" y2="462"/>
+        <text class="vl" x="400" y="496" text-anchor="middle" style="font-size:10px" fill="#FACC15">SETTLED</text>
+      </g>
+      <!-- hatch on cut surfaces -->
+      <g class="vline" stroke="rgba(244,241,232,.06)" stroke-width="1">
+        <line x1="140" y1="430" x2="150" y2="420"/><line x1="152" y1="430" x2="162" y2="420"/><line x1="164" y1="430" x2="174" y2="420"/>
+        <line x1="700" y1="430" x2="690" y2="420"/><line x1="688" y1="430" x2="678" y2="420"/>
+      </g>
+      <!-- flows -->
+      <g class="pkt">
+        <circle class="dot-g" r="4.5"><animateMotion dur="3.2s" repeatCount="indefinite" path="M184 430 L184 154"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3.2s" repeatCount="indefinite"/></circle>
+        <circle class="dot-y" r="4.5"><animateMotion dur="3.2s" repeatCount="indefinite" begin="-1.6s" path="M616 154 L616 430"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3.2s" repeatCount="indefinite" begin="-1.6s"/></circle>
+        <circle class="dot-y" r="4"><animateMotion dur="2.4s" repeatCount="indefinite" begin="-.5s" path="M400 396 L400 460"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="2.4s" repeatCount="indefinite" begin="-.5s"/></circle>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- ============ CONCEPT F : THE ROTUNDA (plan view) ============ -->
+<section class="concept wrap">
+  <div class="concept-head">
+    <span class="concept-letter">F</span>
+    <div>
+      <h2>The <span class="serif">Rotunda</span></h2>
+      <p class="desc">Looking down into a financial building's great hall: concentric floors, radial corridors, and a settlement rotunda at the centre where every asset meets every other.</p>
+      <div class="tags"><span>floor plan</span><span>concentric · radial</span><span>teller ring</span></div>
+    </div>
+  </div>
+  <div class="stage">
+    <svg viewBox="0 0 800 560" role="img" aria-label="Rotunda floor plan with radial corridors and a central settlement core">
+      <!-- concentric rings -->
+      <circle class="vline" cx="400" cy="280" r="210"/>
+      <circle class="vline" cx="400" cy="280" r="130"/>
+      <circle class="vline" cx="400" cy="280" r="62"/>
+      <!-- radial corridors -->
+      <g class="vline">
+        <line x1="400" y1="280" x2="400" y2="70"/>
+        <line x1="400" y1="280" x2="548" y2="132"/>
+        <line x1="400" y1="280" x2="610" y2="280"/>
+        <line x1="400" y1="280" x2="548" y2="428"/>
+        <line x1="400" y1="280" x2="400" y2="490"/>
+        <line x1="400" y1="280" x2="252" y2="428"/>
+        <line x1="400" y1="280" x2="190" y2="280"/>
+        <line x1="400" y1="280" x2="252" y2="132"/>
+      </g>
+      <!-- radius dimension -->
+      <g class="vline-dim"><line x1="400" y1="280" x2="610" y2="280"/><line x1="605" y1="276" x2="610" y2="280"/><line x1="605" y1="284" x2="610" y2="280"/></g>
+      <text class="vdim" x="470" y="272">R 210</text>
+      <!-- desks -->
+      <g>
+        <g transform="translate(400,70)"><rect class="vfill" x="-42" y="-15" width="84" height="30" rx="15"/><text class="vl" x="0" y="4.5" text-anchor="middle" fill="#4ADE80">NGN</text></g>
+        <g transform="translate(548,132)"><rect class="vfill-g" x="-42" y="-15" width="84" height="30" rx="15"/><text class="vl" x="0" y="4.5" text-anchor="middle">EUR</text></g>
+        <g transform="translate(610,280)"><rect class="vfill" x="-42" y="-15" width="84" height="30" rx="15"/><text class="vl" x="0" y="4.5" text-anchor="middle" fill="#4ADE80">GBP</text></g>
+        <g transform="translate(548,428)"><rect class="vfill-g" x="-42" y="-15" width="84" height="30" rx="15"/><text class="vl" x="0" y="4.5" text-anchor="middle">CAD</text></g>
+        <g transform="translate(400,490)"><rect class="vfill" x="-42" y="-15" width="84" height="30" rx="15"/><text class="vl" x="0" y="4.5" text-anchor="middle" fill="#4ADE80">BRL</text></g>
+        <g transform="translate(252,428)"><rect class="vfill-g" x="-42" y="-15" width="84" height="30" rx="15"/><text class="vl" x="0" y="4.5" text-anchor="middle" fill="#86EFAC">USDC</text></g>
+        <g transform="translate(190,280)"><rect class="vfill" x="-42" y="-15" width="84" height="30" rx="15"/><text class="vl" x="0" y="4.5" text-anchor="middle" fill="#4ADE80">MXN</text></g>
+        <g transform="translate(252,132)"><rect class="vfill-g" x="-42" y="-15" width="84" height="30" rx="15"/><text class="vl" x="0" y="4.5" text-anchor="middle" fill="#86EFAC">USD</text></g>
+      </g>
+      <!-- rotunda core -->
+      <g>
+        <circle cx="400" cy="280" r="62" fill="rgba(250,204,21,.06)"/>
+        <circle cx="400" cy="280" r="46" fill="#0A0A08" stroke="rgba(250,204,21,.5)" stroke-width="1.6"/>
+        <text class="vl" x="400" y="274" text-anchor="middle" style="font-size:10px" fill="#FACC15">SETTLEMENT</text>
+        <text class="vl" x="400" y="290" text-anchor="middle" style="font-size:10px">ROTUNDA</text>
+        <circle class="rot" cx="400" cy="280" r="76" fill="none" stroke="rgba(74,222,128,.4)" stroke-width="1.3" stroke-dasharray="3 8"/>
+      </g>
+      <!-- flows: inward (green) + outward (yellow) -->
+      <g class="pkt">
+        <circle class="dot-g" r="4"><animateMotion dur="3s" repeatCount="indefinite" path="M400 76 L400 274"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3s" repeatCount="indefinite"/></circle>
+        <circle class="dot-g" r="4"><animateMotion dur="3s" repeatCount="indefinite" begin="-1.5s" path="M604 280 L406 280"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3s" repeatCount="indefinite" begin="-1.5s"/></circle>
+        <circle class="dot-y" r="4"><animateMotion dur="3s" repeatCount="indefinite" begin="-.7s" path="M406 280 L604 280"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3s" repeatCount="indefinite" begin="-.7s"/></circle>
+        <circle class="dot-y" r="4"><animateMotion dur="3s" repeatCount="indefinite" begin="-2.2s" path="M400 286 L400 484"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3s" repeatCount="indefinite" begin="-2.2s"/></circle>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<div class="note">Three architectural framings of the settlement core — D: a columned facade where rails rise to convert · E: a cut-open clearing house with a settling vault · F: a rotunda floor plan where all assets meet at the centre. <a href="spike-004-hero-concepts.html">← Institutional concepts (A–C)</a> · <a href="spike-003-home.html">← Spike-003 home</a></div>
+
+</body>
+</html>

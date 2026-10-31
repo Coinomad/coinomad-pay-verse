@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Settlement Hall — three ways to flow through it · Coinomad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0A08;--ink:#F4F1E8;--muted:rgba(238,232,214,.58);--faint:rgba(238,232,214,.36);
+  --yellow:#FACC15;--yellow-b:#FFE600;--green:#22C55E;--green-b:#4ADE80;--green-s:#86EFAC;--teal:#6EE7B7;
+  --line:rgba(255,255,255,.09);--line-y:rgba(250,204,21,.22);--line-g:rgba(74,222,128,.22);
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Instrument Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.6}
+.mono{font-family:'JetBrains Mono',monospace}
+.serif{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight:400}
+.wrap{max-width:1280px;margin:0 auto;padding:0 40px}
+.topbar{position:sticky;top:0;z-index:10;background:rgba(10,10,8,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:18px 0}
+.topbar .inner{max-width:1280px;margin:0 auto;padding:0 40px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.topbar a{color:var(--yellow);text-decoration:none;font-weight:600;font-size:14px}
+.topbar .t{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.pagehead{padding:72px 0 8px}
+.pagehead .kicker{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--green-b);margin-bottom:18px}
+.pagehead h1{font-size:clamp(34px,5vw,58px);letter-spacing:-.03em;line-height:1;font-weight:700;max-width:24ch}
+.pagehead h1 .serif{color:var(--yellow)}
+.pagehead p{color:var(--muted);max-width:66ch;margin-top:20px;font-size:16.5px}
+.concept{padding:64px 0 24px}
+.concept-head{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:start;border-bottom:1px solid var(--line);padding-bottom:22px}
+.concept-letter{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--yellow);border:1px solid var(--line-y);border-radius:14px;width:46px;height:46px;display:grid;place-items:center;font-weight:600}
+.concept-head h2{font-size:clamp(24px,3vw,34px);letter-spacing:-.02em;font-weight:700;line-height:1.1}
+.concept-head h2 .serif{color:var(--yellow)}
+.concept-head .desc{color:var(--muted);font-size:15px;margin-top:8px;max-width:60ch;line-height:1.6}
+.concept-head .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.concept-head .tags span{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 11px}
+.stage{margin-top:26px;border:1px solid var(--line);border-radius:26px;background:radial-gradient(120% 140% at 50% -10%,rgba(250,204,21,.06),transparent 55%),linear-gradient(180deg,#0C0C0A,#0A0A08);position:relative;overflow:hidden}
+.stage::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(244,241,232,.045) 1px,transparent 0);background-size:34px 34px;pointer-events:none}
+.stage svg{display:block;width:100%;height:auto;position:relative;z-index:2}
+.vl{fill:var(--ink);font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.06em}
+.vl-sm{fill:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em}
+.vline{stroke:rgba(244,241,232,.14);stroke-width:1.2;fill:none}
+.vfill{fill:rgba(250,204,21,.05)}
+.vfill-g{fill:rgba(34,197,94,.05)}
+.flowg{stroke:var(--green-b);stroke-width:1.8;fill:none;stroke-dasharray:3 12;stroke-linecap:round;animation:flow 2.8s linear infinite}
+.flowy{stroke:var(--yellow);stroke-dasharray:2 9;animation-duration:2.2s}
+.floww{stroke:rgba(244,241,232,.5);stroke-dasharray:2 12;animation-duration:3.4s}
+@keyframes flow{to{stroke-dashoffset:-150}}
+.rot{transform-origin:center;animation:rot 16s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.dot-y{fill:var(--yellow-b)}.dot-g{fill:var(--green-b)}.dot-w{fill:rgba(244,241,232,.85)}
+.note{max-width:1280px;margin:0 auto;padding:40px 40px 70px;font-size:12.5px;color:var(--faint)}
+.note a{color:var(--yellow);text-decoration:none}
+@media(prefers-reduced-motion:reduce){.flowg,.flowy,.floww,.rot{animation:none !important}.pkt{display:none}}
+@media(max-width:800px){.wrap,.topbar .inner,.note{padding-left:20px;padding-right:20px}.concept-head{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="inner">
+  <span class="t">The Settlement Hall · abstract value through the apertures</span>
+  <a href="spike-005-architectural-concepts.html">← Architectural concepts</a>
+</div></div>
+
+<div class="pagehead wrap">
+  <div class="kicker">Value, abstracted · flowing through the holes</div>
+  <h1>Through the <span class="serif">settlement</span>.</h1>
+  <p>No coins, no tickers. Assets are abstract streams — value threading through the openings of a financial building, in a continuous loop. Institutional, banking, trustworthy.</p>
+</div>
+
+<!-- ============ V1 : THE COLONNADE ============ -->
+<section class="concept wrap">
+  <div class="concept-head">
+    <span class="concept-letter">01</span>
+    <div>
+      <h2>The <span class="serif">Colonnade</span></h2>
+      <p class="desc">Value pours down through the bays between six columns, pools in the plinth, and a single stream rises out through the clearing door — one continuous circulation.</p>
+      <div class="tags"><span>columns · bays</span><span>down-flow in · up-flow out</span><span>loop</span></div>
+    </div>
+  </div>
+  <div class="stage">
+    <svg viewBox="0 0 800 560" role="img" aria-label="Colonnade: abstract value flowing down through column bays and out the clearing door">
+      <!-- entablature + pediment -->
+      <rect x="90" y="190" width="620" height="30" class="vline"/>
+      <text class="vl" x="400" y="210" text-anchor="middle" style="font-size:12px;letter-spacing:.22em">SETTLEMENT HALL</text>
+      <polyline class="vline" points="400,128 96,190 704,190 400,128"/>
+      <circle class="rot" cx="400" cy="160" r="15" fill="none" stroke="rgba(250,204,21,.4)" stroke-width="1.1" stroke-dasharray="2 6"/>
+      <!-- plinth -->
+      <rect class="vline" x="110" y="430" width="580" height="16"/>
+      <rect class="vline" x="130" y="446" width="540" height="11"/>
+      <!-- plinth pool flow -->
+      <line class="flowg" x1="120" y1="438" x2="680" y2="438"/>
+      <!-- columns (6) -->
+      <g>
+        <g transform="translate(170,0)"><rect class="vfill" x="-7" y="220" width="14" height="210"/><line class="vline" x1="-7" y1="220" x2="-7" y2="430"/><line class="vline" x1="7" y1="220" x2="7" y2="430"/><rect class="vline" x="-13" y="212" width="26" height="8"/></g>
+        <g transform="translate(250,0)"><rect class="vfill-g" x="-7" y="220" width="14" height="210"/><line class="vline" x1="-7" y1="220" x2="-7" y2="430"/><line class="vline" x1="7" y1="220" x2="7" y2="430"/><rect class="vline" x="-13" y="212" width="26" height="8"/></g>
+        <g transform="translate(330,0)"><rect class="vfill" x="-7" y="220" width="14" height="210"/><line class="vline" x1="-7" y1="220" x2="-7" y2="430"/><line class="vline" x1="7" y1="220" x2="7" y2="430"/><rect class="vline" x="-13" y="212" width="26" height="8"/></g>
+        <g transform="translate(470,0)"><rect class="vfill" x="-7" y="220" width="14" height="210"/><line class="vline" x1="-7" y1="220" x2="-7" y2="430"/><line class="vline" x1="7" y1="220" x2="7" y2="430"/><rect class="vline" x="-13" y="212" width="26" height="8"/></g>
+        <g transform="translate(550,0)"><rect class="vfill-g" x="-7" y="220" width="14" height="210"/><line class="vline" x1="-7" y1="220" x2="-7" y2="430"/><line class="vline" x1="7" y1="220" x2="7" y2="430"/><rect class="vline" x="-13" y="212" width="26" height="8"/></g>
+        <g transform="translate(630,0)"><rect class="vfill" x="-7" y="220" width="14" height="210"/><line class="vline" x1="-7" y1="220" x2="-7" y2="430"/><line class="vline" x1="7" y1="220" x2="7" y2="430"/><rect class="vline" x="-13" y="212" width="26" height="8"/></g>
+      </g>
+      <!-- clearing door (central bay) -->
+      <rect class="vline" x="350" y="332" width="100" height="98"/>
+      <rect class="vline" x="358" y="340" width="84" height="90"/>
+      <circle class="rot" cx="400" cy="372" r="26" fill="none" stroke="rgba(74,222,128,.45)" stroke-width="1.3" stroke-dasharray="3 8"/>
+      <text class="vl" x="400" y="322" text-anchor="middle" style="font-size:9px" fill="#FACC15">CLEARING</text>
+      <!-- value streams down the bays -->
+      <g>
+        <line class="flowg" x1="130" y1="250" x2="130" y2="426"/><line class="flowy" x1="210" y1="250" x2="210" y2="426"/><line class="flowg" x1="290" y1="250" x2="290" y2="426"/>
+        <line class="floww" x1="510" y1="250" x2="510" y2="426"/><line class="flowy" x1="590" y1="250" x2="590" y2="426"/><line class="flowg" x1="670" y1="250" x2="670" y2="426"/>
+      </g>
+      <!-- up-flow out the door -->
+      <line class="flowy" x1="400" y1="424" x2="400" y2="340"/>
+      <!-- beads through the holes -->
+      <g class="pkt">
+        <circle class="dot-g" r="3.6"><animateMotion dur="3s" repeatCount="indefinite" path="M130 256 L130 420"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3s" repeatCount="indefinite"/></circle>
+        <circle class="dot-y" r="3.6"><animateMotion dur="3s" repeatCount="indefinite" begin="-1s" path="M210 256 L210 420"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3s" repeatCount="indefinite" begin="-1s"/></circle>
+        <circle class="dot-g" r="3.6"><animateMotion dur="3s" repeatCount="indefinite" begin="-2s" path="M290 256 L290 420"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3s" repeatCount="indefinite" begin="-2s"/></circle>
+        <circle class="dot-w" r="3.6"><animateMotion dur="3.4s" repeatCount="indefinite" begin="-1.4s" path="M510 256 L510 420"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3.4s" repeatCount="indefinite" begin="-1.4s"/></circle>
+        <circle class="dot-y" r="3.6"><animateMotion dur="3.4s" repeatCount="indefinite" begin="-2.6s" path="M590 256 L590 420"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3.4s" repeatCount="indefinite" begin="-2.6s"/></circle>
+        <circle class="dot-g" r="3.6"><animateMotion dur="3.4s" repeatCount="indefinite" begin="-0.7s" path="M670 256 L670 420"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3.4s" repeatCount="indefinite" begin="-0.7s"/></circle>
+        <circle class="dot-y" r="4"><animateMotion dur="2.6s" repeatCount="indefinite" begin="-0.5s" path="M400 420 L400 344"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="2.6s" repeatCount="indefinite" begin="-0.5s"/></circle>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- ============ V2 : THE ARCADE ============ -->
+<section class="concept wrap">
+  <div class="concept-head">
+    <span class="concept-letter">02</span>
+    <div>
+      <h2>The <span class="serif">Arcade</span></h2>
+      <p class="desc">A row of arched apertures like a cloister or bank portico. Abstract ribbons flow through each arch — green in, yellow out, a neutral thread converting at the centre.</p>
+      <div class="tags"><span>arched apertures</span><span>ribbon waves</span><span>loop</span></div>
+    </div>
+  </div>
+  <div class="stage">
+    <svg viewBox="0 0 800 560" role="img" aria-label="Arcade: abstract ribbons flowing through arched apertures">
+      <!-- entablature -->
+      <rect x="90" y="168" width="620" height="28" class="vline"/>
+      <text class="vl" x="400" y="187" text-anchor="middle" style="font-size:12px;letter-spacing:.24em">THE SETTLEMENT ARCADE</text>
+      <!-- base -->
+      <rect class="vline" x="100" y="430" width="600" height="14"/>
+      <line class="flowy" x1="110" y1="437" x2="690" y2="437"/>
+      <!-- five arches -->
+      <g>
+        <path class="vfill" d="M120 430 L120 250 A 52 52 0 0 1 224 250 L224 430"/>
+        <path class="vfill-g" d="M234 430 L234 250 A 52 52 0 0 1 338 250 L338 430"/>
+        <path class="vfill" d="M348 430 L348 250 A 52 52 0 0 1 452 250 L452 430"/>
+        <path class="vfill-g" d="M462 430 L462 250 A 52 52 0 0 1 566 250 L566 430"/>
+        <path class="vfill" d="M576 430 L576 250 A 52 52 0 0 1 680 250 L680 430"/>
+      </g>
+      <!-- arch outlines -->
+      <g class="vline" stroke-width="1.4">
+        <path d="M120 430 L120 250 A 52 52 0 0 1 224 250 L224 430" fill="none"/>
+        <path d="M234 430 L234 250 A 52 52 0 0 1 338 250 L338 430" fill="none"/>
+        <path d="M348 430 L348 250 A 52 52 0 0 1 452 250 L452 430" fill="none"/>
+        <path d="M462 430 L462 250 A 52 52 0 0 1 566 250 L566 430" fill="none"/>
+        <path d="M576 430 L576 250 A 52 52 0 0 1 680 250 L680 430" fill="none"/>
+      </g>
+      <!-- central rose ring -->
+      <circle class="rot" cx="400" cy="224" r="20" fill="none" stroke="rgba(74,222,128,.45)" stroke-width="1.3" stroke-dasharray="3 8"/>
+      <text class="vl" x="400" y="228" text-anchor="middle" style="font-size:9px" fill="#FACC15">SETTLE</text>
+      <!-- ribbons through arches -->
+      <g>
+        <line class="flowg" x1="172" y1="258" x2="172" y2="424"/>
+        <line class="flowy" x1="286" y1="258" x2="286" y2="424"/>
+        <line class="floww" x1="400" y1="258" x2="400" y2="424"/>
+        <line class="flowy" x1="514" y1="258" x2="514" y2="424"/>
+        <line class="flowg" x1="628" y1="258" x2="628" y2="424"/>
+      </g>
+      <g class="pkt">
+        <circle class="dot-g" r="3.6"><animateMotion dur="3.2s" repeatCount="indefinite" path="M172 264 L172 418"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3.2s" repeatCount="indefinite"/></circle>
+        <circle class="dot-y" r="3.6"><animateMotion dur="3.2s" repeatCount="indefinite" begin="-1.1s" path="M286 418 L286 264"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3.2s" repeatCount="indefinite" begin="-1.1s"/></circle>
+        <circle class="dot-w" r="3.6"><animateMotion dur="3.6s" repeatCount="indefinite" begin="-2.2s" path="M400 264 L400 418"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3.6s" repeatCount="indefinite" begin="-2.2s"/></circle>
+        <circle class="dot-y" r="3.6"><animateMotion dur="3.2s" repeatCount="indefinite" begin="-0.6s" path="M514 418 L514 264"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3.2s" repeatCount="indefinite" begin="-0.6s"/></circle>
+        <circle class="dot-g" r="3.6"><animateMotion dur="3.2s" repeatCount="indefinite" begin="-1.7s" path="M628 264 L628 418"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.8;1" dur="3.2s" repeatCount="indefinite" begin="-1.7s"/></circle>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- ============ V3 : THE PERFORATED SCREEN ============ -->
+<section class="concept wrap">
+  <div class="concept-head">
+    <span class="concept-letter">03</span>
+    <div>
+      <h2>The <span class="serif">Vault Screen</span></h2>
+      <p class="desc">A solid wall of punched apertures — a safety-deposit screen. Value threads through each hole in a wave, passing into the building and returning. Pure texture, pure flow.</p>
+      <div class="tags"><span>punched apertures</span><span>threaded flow</span><span>wave · loop</span></div>
+    </div>
+  </div>
+  <div class="stage">
+    <svg viewBox="0 0 800 560" role="img" aria-label="Vault screen: abstract value threading through punched apertures">
+      <!-- wall panel -->
+      <rect class="vline" x="150" y="130" width="500" height="320"/>
+      <!-- vertical streams behind (threads) -->
+      <g>
+        <line class="flowg" x1="210" y1="150" x2="210" y2="432"/><line class="flowy" x1="282" y1="150" x2="282" y2="432"/><line class="flowg" x1="354" y1="150" x2="354" y2="432"/>
+        <line class="floww" x1="426" y1="150" x2="426" y2="432"/><line class="flowy" x1="498" y1="150" x2="498" y2="432"/><line class="flowg" x1="570" y1="150" x2="570" y2="432"/>
+      </g>
+      <!-- punched holes grid -->
+      <g class="vline" stroke-width="1">
+        <!-- 6 cols x 4 rows, r=11 -->
+        <circle cx="210" cy="196" r="11"/><circle cx="282" cy="196" r="11"/><circle cx="354" cy="196" r="11"/><circle cx="426" cy="196" r="11"/><circle cx="498" cy="196" r="11"/><circle cx="570" cy="196" r="11"/>
+        <circle cx="210" cy="268" r="11"/><circle cx="282" cy="268" r="11"/><circle cx="354" cy="268" r="11"/><circle cx="426" cy="268" r="11"/><circle cx="498" cy="268" r="11"/><circle cx="570" cy="268" r="11"/>
+        <circle cx="210" cy="340" r="11"/><circle cx="282" cy="340" r="11"/><circle cx="354" cy="340" r="11"/><circle cx="426" cy="340" r="11"/><circle cx="498" cy="340" r="11"/><circle cx="570" cy="340" r="11"/>
+        <circle cx="210" cy="412" r="11"/><circle cx="282" cy="412" r="11"/><circle cx="354" cy="412" r="11"/><circle cx="426" cy="412" r="11"/><circle cx="498" cy="412" r="11"/><circle cx="570" cy="412" r="11"/>
+      </g>
+      <!-- beads threading through holes (scale/fade at each aperture) -->
+      <g class="pkt">
+        <circle class="dot-g" r="4"><animateMotion dur="3.4s" repeatCount="indefinite" path="M210 190 L210 200"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.15;.85;1" dur="3.4s" repeatCount="indefinite"/></circle>
+        <circle class="dot-y" r="4"><animateMotion dur="3.4s" repeatCount="indefinite" begin="-1.1s" path="M282 190 L282 200"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.15;.85;1" dur="3.4s" repeatCount="indefinite" begin="-1.1s"/></circle>
+        <circle class="dot-g" r="4"><animateMotion dur="3.4s" repeatCount="indefinite" begin="-2.2s" path="M354 262 L354 272"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.15;.85;1" dur="3.4s" repeatCount="indefinite" begin="-2.2s"/></circle>
+        <circle class="dot-w" r="4"><animateMotion dur="3.6s" repeatCount="indefinite" begin="-0.8s" path="M426 334 L426 344"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.15;.85;1" dur="3.6s" repeatCount="indefinite" begin="-0.8s"/></circle>
+        <circle class="dot-y" r="4"><animateMotion dur="3.4s" repeatCount="indefinite" begin="-1.8s" path="M498 406 L498 416"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.15;.85;1" dur="3.4s" repeatCount="indefinite" begin="-1.8s"/></circle>
+        <circle class="dot-g" r="4"><animateMotion dur="3.4s" repeatCount="indefinite" begin="-2.9s" path="M570 190 L570 200"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.15;.85;1" dur="3.4s" repeatCount="indefinite" begin="-2.9s"/></circle>
+      </g>
+      <!-- central larger aperture -->
+      <circle cx="400" cy="280" r="34" class="vline" stroke-width="1.4"/>
+      <circle class="rot" cx="400" cy="280" r="26" fill="none" stroke="rgba(74,222,128,.45)" stroke-width="1.3" stroke-dasharray="3 8"/>
+      <text class="vl" x="400" y="284" text-anchor="middle" style="font-size:9px" fill="#FACC15">SETTLE</text>
+    </svg>
+  </div>
+</section>
+
+<div class="note">Three ways to flow through the settlement — 01 colonnade (bays) · 02 arcade (arches) · 03 vault screen (punched holes). Value is abstract: streams + beads, green in / yellow out / neutral white converting, in a continuous loop. No literal coins or currency labels — the apertures are the meaning. <a href="spike-005-architectural-concepts.html">← Architectural concepts</a> · <a href="spike-003-home.html">← Spike-003 home</a></div>
+
+</body>
+</html>
